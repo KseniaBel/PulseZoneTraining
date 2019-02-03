@@ -1,0 +1,70 @@
+<resources>
+    <string name="app_name">Pulse zone training</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    //Dialog pulse zone
+    <string name="dialog_input_data_title">User Settings</string>
+    <string name="input_data_text_view">Input data:</string>
+    <string name="gender_text_view">Gender:</string>
+    <string name="female_radio_button">Female</string>
+    <string name="male_radio_button">Male</string>
+    <string name="age_text_view">Age:</string>
+    <string name="age_hint">0</string>
+    <string name="restHr_text_view">Resting Heart Rate:</string>
+    <string name="restHr_hint">0</string>
+    <string name="maxHr_text_view">Max Heart Rate:</string>
+    <string name="maxHr_hint">0</string>
+    <string name="weight_text_view">Weight:</string>
+    <string name="weight_hint">0</string>
+
+
+    //Dashboard activity
+    <string name="sampler_version_text_view">Sampler Version:</string>
+    <string name="built_pluginlib_text_view">Built w/ PluginLib:</string>
+    <string name="installed_plugin_version_text_view">Installed Plugin Version:</string>
+
+    //Pulse zone activity
+    <string name="status_text_view">[status]</string>
+    <string name="heart_rate_text_view">Heart Rate:</string>
+    <string name="heart_rate_value_text_view">---</string>
+    <string name="pause_button">Pause</string>
+    <string name="stop_button">Stop</string>
+    <string name="graph_data">Heart rate data</string>
+    <string name="title_activity_main">Pulse Zone Training</string>
+    <string name="input_settings_error">Please input user settings before starting workout</string>
+    <string name="content_descr_account_settings">Account settings</string>
+    <string name="name_channel">"Fitness app"</string>
+    <string name="description_channel">"Provides info about fitness activity"</string>
+
+    //Dialog progress waiter
+    <string name="search_device_text_view">Searching for device(s)...</string>
+    <string name="connection_string">Connecting...</string>
+    <string name="error_string">Error</string>
+
+    //Activity workout statistics
+    <string name="workout_finished_text_view">Workout finished</string>
+    <string name="time_of_workout_text_view">Time of workout:</string>
+    <string name="time_workout_value">00:00:00</string>
+    <string name="average_heart_rate_text">Average heart rate:</string>
+    <string name="average_heart_rate_value">0 bpm</string>
+    <string name="maximum_heart_rate_text">Maximum heart rate</string>
+    <string name="max_heart_rate_value">0 bpm</string>
+    <string name="calories_text">Total calories burned:</string>
+    <string name="calories_value">0 kcal</string>
+
+    //Dialog Zone input
+    <string name="dialog_zone_title">Pulse Zone Settings</string>
+    <string name="choose_hr_zone">Choose Heart Rate Zone:</string>
+    <string name="zone1_radio_button">Zone 1: Healthy Heart(40–52%)</string>
+    <string name="zone2_radio_button">Zone 2: Easy(52–64%)</string>
+    <string name="zone3_radio_button">Zone 3: Aerobic(64–76%)</string>
+    <string name="zone4_radio_button">Zone 4: Anaerobic Threshold(76–88%)</string>
+    <string name="zone5_radio_button">Zone 5: VO2 Maximum(88–100%)</string>
+
+
+
+</resources>

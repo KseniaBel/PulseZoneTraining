@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <include
+        layout="@layout/nav_header_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#D7D7D7"
+                android:paddingBottom="3dp"
+                android:paddingEnd="10dp"
+                android:paddingStart="5dp"
+                android:paddingTop="3dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="5dp"
+                    android:layout_toStartOf="@+id/radioGroupSex"
+                    android:padding="10dp"
+                    android:text="@string/gender_text_view" />
+
+                <RadioGroup
+                    android:id="@+id/radioGroupSex"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:orientation="horizontal"
+                    android:paddingBottom="3dp"
+                    android:paddingEnd="10dp"
+                    android:paddingStart="5dp"
+                    android:paddingTop="3dp">
+
+                    <RadioButton
+                        android:id="@+id/radioButton_Female"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:checked="true"
+                        android:text="@string/female_radio_button" />
+
+                    <RadioButton
+                        android:id="@+id/radioButton_Male"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/male_radio_button" />
+
+                </RadioGroup>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="3dp"
+                android:paddingEnd="10dp"
+                android:paddingStart="5dp"
+                android:paddingTop="3dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="5dp"
+                    android:layout_toStartOf="@id/editText_Age"
+                    android:padding="10dp"
+                    android:text="@string/age_text_view" />
+
+                <com.ksenia.pulsezonetraining.NumericEditText
+                    android:id="@+id/editText_Age"
+                    custom:max_value="130"
+                    custom:min_value="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:hint="@string/age_hint"
+                    android:inputType="number"
+                    android:maxLength="3"
+                    android:minWidth="125dp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#D7D7D7"
+                android:paddingBottom="3dp"
+                android:paddingEnd="10dp"
+                android:paddingStart="5dp"
+                android:paddingTop="3dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="5dp"
+                    android:layout_toStartOf="@id/editText_Weight"
+                    android:padding="10dp"
+                    android:text="@string/weight_text_view" />
+
+                <com.ksenia.pulsezonetraining.NumericEditText
+                    android:id="@+id/editText_Weight"
+                    custom:max_value="300"
+                    custom:min_value="30"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:hint="@string/weight_hint"
+                    android:inputType="number"
+                    android:maxLength="3"
+                    android:minWidth="125dp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="3dp"
+                android:paddingEnd="10dp"
+                android:paddingStart="5dp"
+                android:paddingTop="3dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="5dp"
+                    android:layout_toStartOf="@+id/editText_RestHR"
+                    android:padding="10dp"
+                    android:text="@string/restHr_text_view" />
+
+                <com.ksenia.pulsezonetraining.NumericEditText
+                    android:id="@+id/editText_RestHR"
+                    custom:max_value="99"
+                    custom:min_value="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:hint="@string/restHr_hint"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:minWidth="125dp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#D7D7D7"
+                android:paddingBottom="3dp"
+                android:paddingEnd="10dp"
+                android:paddingStart="5dp"
+                android:paddingTop="3dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="5dp"
+                    android:padding="10dp"
+                    android:text="@string/maxHr_text_view"
+                    android:layout_toStartOf="@+id/editText_MaxHR"/>
+
+                <EditText
+                    android:id="@+id/editText_MaxHR"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:hint="@string/maxHr_hint"
+                    android:inputType="number"
+                    android:maxLength="3"
+                    android:minWidth="125dp" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

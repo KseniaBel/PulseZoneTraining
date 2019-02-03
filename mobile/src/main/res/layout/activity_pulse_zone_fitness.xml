@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This software is subject to the license described in the License.txt file
+included with this software distribution. You may not use this file except in compliance
+with this license.
+
+Copyright (c) Dynastream Innovations Inc. 2013
+All rights reserved.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".Activity_PulseZonesFitness">
+
+    <LinearLayout
+        android:id="@+id/linearLayout_TitleAndStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textView_ZoneStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_text_view"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="italic" />
+
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linearLayout_TitleAndStatus" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#D7D7D7"
+                android:paddingBottom="3dp"
+                android:paddingTop="3dp" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginBottom="5dp"
+                    android:textStyle="bold"
+                    android:text="@string/heart_rate_text_view"
+                    android:layout_toStartOf="@+id/textView_HeartRatePulseZone"/>
+
+                <TextView
+                    android:id="@+id/textView_HeartRatePulseZone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:textStyle="bold"
+                    android:text="@string/heart_rate_value_text_view" />
+
+            </RelativeLayout>
+
+            <com.ksenia.pulsezonetraining.CustomChronometer
+                android:id="@+id/chronometer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|center_horizontal|center"
+                android:padding="10dp"
+                android:textAlignment="center" />
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/graph"
+                android:layout_width="match_parent"
+                android:layout_height="200dip" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="214dp"
+                android:layout_gravity="fill_vertical"
+                android:paddingBottom="3dp"
+                android:paddingTop="3dp">
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/button_pause"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="@dimen/fab_margin"
+                    app:srcCompat="@drawable/baseline_pause_24" />
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/button_stop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="@dimen/fab_margin"
+                    app:srcCompat="@drawable/baseline_stop_24" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

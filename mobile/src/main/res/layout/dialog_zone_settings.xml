@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:text="@string/choose_hr_zone"
+        android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
+
+
+        <RadioGroup
+            android:id="@+id/radioGroupZones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="3dp"
+            android:paddingTop="3dp">
+
+            <RadioButton
+                android:id="@+id/radioButton_Zone1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:checked="true"
+                android:text="@string/zone1_radio_button"
+                android:textAppearance="@style/TextAppearance.AppCompat" />
+
+            <RadioButton
+                android:id="@+id/radioButton_Zone2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:text="@string/zone2_radio_button"
+                android:textAppearance="@style/TextAppearance.AppCompat" />
+
+            <RadioButton
+                android:id="@+id/radioButton_Zone3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:text="@string/zone3_radio_button"
+                android:textAppearance="@style/TextAppearance.AppCompat" />
+
+            <RadioButton
+                android:id="@+id/radioButton_Zone4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:text="@string/zone4_radio_button"
+                android:textAppearance="@style/TextAppearance.AppCompat" />
+
+            <RadioButton
+                android:id="@+id/radioButton_Zone5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/zone5_radio_button"
+                android:textAppearance="@style/TextAppearance.AppCompat" />
+
+        </RadioGroup>
+
+
+</LinearLayout>
