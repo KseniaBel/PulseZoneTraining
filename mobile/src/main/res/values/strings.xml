@@ -35,7 +35,7 @@
     <string name="stop_button">Stop</string>
     <string name="graph_data">Heart rate data</string>
     <string name="title_activity_main">Pulse Zone Training</string>
-    <string name="input_settings_error">Please input user settings before starting workout</string>
+    <string name="input_settings_error">Please input user settings before starting workoutHistoryItem</string>
     <string name="content_descr_account_settings">Account settings</string>
     <string name="name_channel">"Fitness app"</string>
     <string name="description_channel">"Provides info about fitness activity"</string>
@@ -45,7 +45,7 @@
     <string name="connection_string">Connecting...</string>
     <string name="error_string">Error</string>
 
-    //Activity workout statistics
+    //Activity workoutHistoryItem statistics
     <string name="workout_finished_text_view">Workout finished</string>
     <string name="time_of_workout_text_view">Time of workout:</string>
     <string name="time_workout_value">00:00:00</string>

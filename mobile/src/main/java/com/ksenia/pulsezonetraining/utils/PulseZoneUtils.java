@@ -1,6 +1,7 @@
 package com.ksenia.pulsezonetraining.utils;
 
 import com.ksenia.pulsezonetraining.R;
+import com.ksenia.pulsezonetraining.preferences.PulseZoneSettings;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -100,12 +101,14 @@ public class PulseZoneUtils {
         return (int) Math.round(0.014*weight*minutes*(0.12*heartRateAverage - 7));
     }
 
-    public static String getDate() {
-        Date date = new Date();
+    public static String getDate(long milliseconds) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
+        calendar.setTimeInMillis(milliseconds);
+        int mYear = calendar.get(Calendar.YEAR);
+        int mMonth = calendar.get(Calendar.MONTH);
+        int mDay = calendar.get(Calendar.DAY_OF_MONTH);
         int dayNr = calendar.get(Calendar.DAY_OF_WEEK);
-        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
         String dayOfWeek = "";
         switch (dayNr){
             case Calendar.MONDAY:
@@ -131,6 +134,68 @@ public class PulseZoneUtils {
                 break;
         }
 
-        return String.format("%s %d", dayOfWeek, dayOfMonth);
+        String monthName = "";
+        switch (mMonth){
+            case Calendar.JANUARY:
+                monthName = "JANUARY";
+                break;
+            case Calendar.FEBRUARY:
+                monthName = "FEBRUARY";
+                break;
+            case Calendar.MARCH:
+                monthName = "MARCH";
+                break;
+            case Calendar.APRIL:
+                monthName = "APRIL";
+                break;
+            case Calendar.MAY:
+                monthName = "MAY";
+                break;
+            case Calendar.JUNE:
+                monthName = "JUNE";
+                break;
+            case Calendar.JULY:
+                monthName = "JULY";
+                break;
+            case Calendar.AUGUST:
+                monthName = "AUGUST";
+                break;
+            case Calendar.SEPTEMBER:
+                monthName = "SEPTEMBER";
+                break;
+            case Calendar.OCTOBER:
+                monthName = "OCTOBER";
+                break;
+            case Calendar.NOVEMBER:
+                monthName = "NOVEMBER";
+                break;
+            case Calendar.DECEMBER:
+                monthName = "DECEMBER";
+                break;
+        }
+
+        return String.format("%d %s %02d  %s", mDay, monthName, mYear, dayOfWeek);
+    }
+
+    public static String getZoneName(int zoneButtonId) {
+        String zone = "";
+        switch (zoneButtonId){
+            case R.id.radioButton_Zone1:
+                zone = "Healthy Heart workout";
+                break;
+            case R.id.radioButton_Zone2:
+                zone = "Easy workout";
+                break;
+            case R.id.radioButton_Zone3:
+                zone = "Aerobic workout";
+                break;
+            case R.id.radioButton_Zone4:
+                zone = "Anaerobic Threshold workout";
+                break;
+            case R.id.radioButton_Zone5:
+                zone = "Maximum oxygen uptake workout";
+                break;
+        }
+        return zone;
     }
 }

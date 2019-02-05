@@ -9,8 +9,10 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
-import com.ksenia.pulsezonetraining.utils.PulseZoneSettings;
+import com.ksenia.pulsezonetraining.preferences.InvalidPreferenceException;
+import com.ksenia.pulsezonetraining.preferences.PulseZoneSettings;
 
 /**
  * Created by ksenia on 24.01.19.
@@ -24,10 +26,9 @@ public class Dialog_ZoneInput extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                 .setPositiveButton("OK", (DialogInterface dialog, int which) -> {
-                    pulseSettings = new PulseZoneSettings(getContext());
                     pulseSettings.setZoneRadioButtonId(radioGroupZone.getCheckedRadioButtonId());
-                    pulseSettings.save();
-                    Intent intent = new Intent(Dialog_ZoneInput.this.getActivity(), Activity_PulseZonesFitness.class);
+                    pulseSettings.save(getContext());
+                    Intent intent = new Intent(getActivity(), Activity_PulseZonesFitness.class);
                     startActivity(intent);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
@@ -43,12 +44,11 @@ public class Dialog_ZoneInput extends DialogFragment {
         radioGroupZone = detailsView.findViewById(R.id.radioGroupZones);
 
         //Get shared preferences
-        pulseSettings = new PulseZoneSettings(detailsView.getContext());
+        pulseSettings = new PulseZoneSettings();
+        pulseSettings.read(getContext());
         radioGroupZone.check(pulseSettings.getZoneRadioButtonId());
 
-        return builder.create();
+            return builder.create();
     }
-
-
 
 }

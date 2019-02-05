@@ -5,7 +5,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -16,12 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.media.MediaDescriptionCompat;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaButtonReceiver;
-import android.support.v4.media.session.MediaControllerCompat;
 import android.view.View;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,8 +24,10 @@ import com.dsi.ant.plugins.antplus.pcc.defines.DeviceState;
 import com.dsi.ant.plugins.antplus.pccbase.AntPluginPcc.IDeviceStateChangeReceiver;
 import com.dsi.ant.plugins.antplus.pccbase.AntPluginPcc.IPluginAccessResultReceiver;
 import com.dsi.ant.plugins.antplus.pccbase.PccReleaseHandle;
+import com.ksenia.pulsezonetraining.database.FitnessSQLiteDBHelper;
+import com.ksenia.pulsezonetraining.preferences.InvalidPreferenceException;
 import com.ksenia.pulsezonetraining.utils.PulseLimits;
-import com.ksenia.pulsezonetraining.utils.PulseZoneSettings;
+import com.ksenia.pulsezonetraining.preferences.PulseZoneSettings;
 import com.ksenia.pulsezonetraining.utils.PulseZoneUtils;
 import com.ksenia.pulsezonetraining.database.HRRecordsRepository;
 import com.github.mikephil.charting.charts.LineChart;
@@ -66,6 +62,7 @@ public class Activity_PulseZonesFitness extends Activity {
     public static final String WEIGHT = "weight";
     private static final String CHANNEL_ID = "1";
     private static final int NOTIFICATION_ID = 0;
+    public static final String ZONE_BUTTON_ID = "zoneButtonId";
     private AntPlusHeartRatePcc hrPcc = null;
     private PccReleaseHandle<AntPlusHeartRatePcc> releaseHandle = null;
     private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -100,43 +97,45 @@ public class Activity_PulseZonesFitness extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pulse_zone_fitness);
+            setContentView(R.layout.activity_pulse_zone_fitness);
+            pulseSettings = new PulseZoneSettings();
+            pulseSettings.read(getApplicationContext());
+            logger.info("Restore setting: " + pulseSettings.toString());
+            pulseLimits = PulseZoneUtils.calculateZonePulse(pulseSettings);
+            logger.info("low: " + pulseLimits.getLowPulseLimit() + " high: " + pulseLimits.getHighPulseLimit());
+            readingsBuffer = Collections.synchronizedList(new ArrayList<>());
 
-        pulseSettings = new PulseZoneSettings(this.getApplicationContext());
-        logger.info("Restore setting: " + pulseSettings.toString());
-        pulseLimits = PulseZoneUtils.calculateZonePulse(pulseSettings);
-        logger.info("low: " + pulseLimits.getLowPulseLimit() + " high: " + pulseLimits.getHighPulseLimit());
-        readingsBuffer = Collections.synchronizedList(new ArrayList<>());
+            tv_status = findViewById(R.id.textView_ZoneStatus);
+            tv_heartRate = findViewById(R.id.textView_HeartRatePulseZone);
+            chronometer = findViewById(R.id.chronometer);
+            tv_status.setText(R.string.connection_string);
+            btn_pauseResume = findViewById(R.id.button_pause);
+            btn_stop = findViewById(R.id.button_stop);
+            btn_stop.setVisibility(View.GONE);
+            graph = findViewById(R.id.graph);
+            setupChart();
+            setLegend();
+            setupAxes();
+            setupData();
 
-        tv_status = findViewById(R.id.textView_ZoneStatus);
-        tv_heartRate = findViewById(R.id.textView_HeartRatePulseZone);
-        chronometer = findViewById(R.id.chronometer);
-        tv_status.setText(R.string.connection_string);
-        btn_pauseResume = findViewById(R.id.button_pause);
-        btn_stop = findViewById(R.id.button_stop);
-        btn_stop.setVisibility(View.GONE);
-        graph = findViewById(R.id.graph);
-        setupChart();
-        setLegend();
-        setupAxes();
-        setupData();
+            createNotificationChannel();
 
-        createNotificationChannel();
+            FitnessSQLiteDBHelper helper = new FitnessSQLiteDBHelper(this);
+            repository = new HRRecordsRepository(helper);
+            handleReset();
 
-        repository = new HRRecordsRepository(this);
-        handleReset();
+            btn_pauseResume.setOnClickListener(PAUSE_RESUME_ACTION);
 
-        btn_pauseResume.setOnClickListener(PAUSE_RESUME_ACTION);
-
-        btn_stop.setOnClickListener(view -> {
-            unsubscribeToHrEvents();
-            Intent intent = new Intent(this, Activity_WorkoutStatistics.class);
-            intent.putExtra(START_TIMING, chronometer.getStartTime());
-            intent.putExtra(WORKOUT_TIME, chronometer.getText());
-            intent.putExtra(WEIGHT, pulseSettings.getWeight());
-            startActivity(intent);
-            finish();
-        });
+            btn_stop.setOnClickListener(view -> {
+                unsubscribeToHrEvents();
+                Intent intent = new Intent(this, Activity_WorkoutStatistics.class);
+                intent.putExtra(START_TIMING, chronometer.getStartTime());
+                intent.putExtra(WORKOUT_TIME, chronometer.getText());
+                intent.putExtra(WEIGHT, pulseSettings.getWeight());
+                intent.putExtra(ZONE_BUTTON_ID, pulseSettings.getZoneRadioButtonId());
+                startActivity(intent);
+                finish();
+            });
     }
 
 
@@ -356,21 +355,21 @@ public class Activity_PulseZonesFitness extends Activity {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         //This is the intent of PendingIntent
-        Intent intentAction = new Intent(this, ActionReceiver.class);
+        //Intent intentAction = new Intent(this, ActionReceiver.class);
         //intentAction.putExtra("pause","pauseWorkout");
        // intentAction.putExtra("resume", "resumeWorkout");
 
-        PendingIntent pIntent = PendingIntent.getBroadcast(this,1, intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
+        //PendingIntent pIntent = PendingIntent.getBroadcast(this,1, intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark_normal_background)
-                .setContentTitle("Workout")
+                .setContentTitle("WorkoutHistoryItem")
                 .setContentText(String.format("Heart rate: %d\nTime: %s", heartRate, timer))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 // Set the intent that will fire when the user taps the notification
                 .setContentIntent(pendingIntent)
-                .addAction(R.drawable.baseline_pause_24, "Pause", pIntent)
-                .addAction(R.drawable.baseline_play_arrow_24, "Resume", pIntent)
+                //.addAction(R.drawable.baseline_pause_24, "Pause", pIntent)
+                //.addAction(R.drawable.baseline_play_arrow_24, "Resume", pIntent)
                 .setAutoCancel(true)
                 .setVisibility(VISIBILITY_PUBLIC)
                 .setCategory(Notification.CATEGORY_MESSAGE);

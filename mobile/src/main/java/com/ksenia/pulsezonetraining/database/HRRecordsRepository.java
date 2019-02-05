@@ -11,12 +11,11 @@ import android.os.SystemClock;
  */
 
 public class HRRecordsRepository {
-    SQLiteDatabase database;
-    SQLiteDatabase databaseRead;
+    private FitnessSQLiteDBHelper dbHelper;
+    SQLiteDatabase database = dbHelper.getWritableDatabase();
 
-    public HRRecordsRepository(Activity activity) {
-        database =  new FitnessSQLiteDBHelper(activity).getWritableDatabase();
-        databaseRead = new FitnessSQLiteDBHelper(activity).getReadableDatabase();
+    public HRRecordsRepository(FitnessSQLiteDBHelper dbHelper) {
+        this.dbHelper = dbHelper;
     }
 
     public void addNewRecord(int heartRate) {
@@ -26,8 +25,9 @@ public class HRRecordsRepository {
         database.insert(FitnessSQLiteDBHelper.RECORDS_TABLE_NAME, null, values);
     }
 
+
     public int getMaxHeartRate(long startTime, long endTime) {
-        Cursor cursor = databaseRead.rawQuery("SELECT MAX(heart_rate) FROM records WHERE time BETWEEN " + startTime + " and " + endTime, null);
+        Cursor cursor = database.rawQuery("SELECT (heart_rate) FROM records WHERE time BETWEEN " + startTime + " and " + endTime, null);
         int value = 0;
         if (cursor.moveToFirst()) {
             value = cursor.getInt(0);
@@ -37,7 +37,7 @@ public class HRRecordsRepository {
     }
 
     public int getAverageHeartRate(long startTime, long endTime) {
-        Cursor cursor = databaseRead.rawQuery("SELECT AVG(heart_rate) FROM records WHERE time BETWEEN " + startTime + " and " + endTime, null);
+        Cursor cursor = database.rawQuery("SELECT AVG(heart_rate) FROM records WHERE time BETWEEN " + startTime + " and " + endTime, null);
         int value = 0;
         if (cursor.moveToFirst()) {
             value = Math.round(cursor.getFloat(0));
@@ -47,7 +47,6 @@ public class HRRecordsRepository {
     }
 
     public void closeDb() {
-        databaseRead.close();
         database.close();
     }
 

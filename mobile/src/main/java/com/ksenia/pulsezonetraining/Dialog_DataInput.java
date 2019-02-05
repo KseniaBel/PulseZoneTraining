@@ -4,7 +4,6 @@ package com.ksenia.pulsezonetraining;
  * Created by ksenia on 30.12.18.
  */
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -22,7 +21,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ksenia.pulsezonetraining.utils.PulseZoneSettings;
+import com.ksenia.pulsezonetraining.preferences.InvalidPreferenceException;
+import com.ksenia.pulsezonetraining.preferences.PulseZoneSettings;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -90,9 +90,8 @@ public class Dialog_DataInput extends DialogFragment {
             }
         });
 
-
-        //Get shared preferences
-        pulseSettings = new PulseZoneSettings(detailsView.getContext());
+        pulseSettings = new PulseZoneSettings();
+        pulseSettings.read(getContext());
         radioGroupGender.check(pulseSettings.getGenderRadioButtonId());
         et_age.setText(String.valueOf(pulseSettings.getAge()));
         et_rest_hr.setText(String.valueOf(pulseSettings.getRestHr()));
@@ -102,6 +101,7 @@ public class Dialog_DataInput extends DialogFragment {
 
         return builder.create();
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -167,14 +167,13 @@ public class Dialog_DataInput extends DialogFragment {
                     }
                     int weightFieldValue = Integer.parseInt(et_weight.getText().toString());
 
-                    pulseSettings = new PulseZoneSettings(getContext());
                     pulseSettings.setGenderRadioButtonId(radioGroupGender.getCheckedRadioButtonId());
                     pulseSettings.setAge(ageFieldValue);
                     pulseSettings.setRestHr(restHrFieldValue);
                     pulseSettings.setMaxHr(maxHrFieldValue);
                     pulseSettings.setWeight(weightFieldValue);
                     //pulseSettings.setZoneRadioButtonId(radioGroupZone.getCheckedRadioButtonId());
-                    pulseSettings.save();
+                    pulseSettings.save(getContext());
 
                    wantToCloseDialog = true;
                     if(wantToCloseDialog)
