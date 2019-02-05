@@ -12,10 +12,11 @@ import android.os.SystemClock;
 
 public class HRRecordsRepository {
     private FitnessSQLiteDBHelper dbHelper;
-    SQLiteDatabase database = dbHelper.getWritableDatabase();
+    SQLiteDatabase database;
 
-    public HRRecordsRepository(FitnessSQLiteDBHelper dbHelper) {
-        this.dbHelper = dbHelper;
+    public HRRecordsRepository(FitnessSQLiteDBHelper helper) {
+        dbHelper = helper;
+        database =  dbHelper.getWritableDatabase();
     }
 
     public void addNewRecord(int heartRate) {

@@ -15,10 +15,11 @@ import java.util.ArrayList;
 
 public class StatisticRepository {
     private FitnessSQLiteDBHelper dbHelper;
-    SQLiteDatabase database = dbHelper.getWritableDatabase();
+    SQLiteDatabase database;
 
-    public StatisticRepository(FitnessSQLiteDBHelper dbHelper) {
-        this.dbHelper = dbHelper;
+    public StatisticRepository(FitnessSQLiteDBHelper helper) {
+        dbHelper = helper;
+        database =  dbHelper.getWritableDatabase();
     }
 
     public void addStatisticRecord(long startTime, long elapsedTime, int calories, String zone, long currentTime) {
