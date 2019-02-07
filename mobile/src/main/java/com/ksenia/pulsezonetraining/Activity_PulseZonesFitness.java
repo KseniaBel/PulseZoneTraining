@@ -172,10 +172,9 @@ public class Activity_PulseZonesFitness extends Activity {
 
     private void setupAxes() {
         XAxis xl = graph.getXAxis();
-        xl.setTextColor(Color.WHITE);
         xl.setDrawGridLines(false);
         xl.setAvoidFirstLastClipping(true);
-        xl.setEnabled(true);
+        xl.setEnabled(false);
 
         YAxis leftAxis = graph.getAxisLeft();
         leftAxis.setTextColor(Color.WHITE);
@@ -329,7 +328,7 @@ public class Activity_PulseZonesFitness extends Activity {
         final String textHeartRate = String.valueOf(computedHeartRate);
 
         runOnUiThread(() -> {
-            addEntry(chronometer.getElapsedTime(), computedHeartRate);
+            addEntry(chronometer.getElapsedTime()/1000, computedHeartRate);
             repository.addNewRecord(computedHeartRate);
             tv_heartRate.setText(textHeartRate);
 

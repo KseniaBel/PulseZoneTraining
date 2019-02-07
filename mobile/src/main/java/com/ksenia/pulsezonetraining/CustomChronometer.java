@@ -5,6 +5,8 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.widget.Chronometer;
 
+import com.ksenia.pulsezonetraining.utils.PulseZoneUtils;
+
 /**
  * Created by ksenia on 06.01.19.
  */
@@ -77,7 +79,7 @@ public class CustomChronometer extends Chronometer {
      */
     public int getElapsedTime() {
         totalElapsedTime = (int)(SystemClock.elapsedRealtime() - getBase());
-        return totalElapsedTime/1000;
+        return totalElapsedTime;
     }
 
     public long getLastStopTime() {
@@ -94,5 +96,10 @@ public class CustomChronometer extends Chronometer {
      */
     public boolean isRunning() {
         return isRunning;
+    }
+
+    @Override
+    public CharSequence getText() {
+        return PulseZoneUtils.fromMillisecondsToTime(getElapsedTime());
     }
 }

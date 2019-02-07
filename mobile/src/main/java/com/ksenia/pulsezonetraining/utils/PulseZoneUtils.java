@@ -98,7 +98,8 @@ public class PulseZoneUtils {
      */
     public static int calculateTotalCalories(int weight, long workoutTime, int heartRateAverage) {
         int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(workoutTime) % 60;
-        return (int) Math.round(0.014*weight*minutes*(0.12*heartRateAverage - 7));
+        int totalCalories = (int) Math.round(0.014*weight*minutes*(0.12*heartRateAverage - 7));
+        return totalCalories > 0 ? totalCalories : 0;
     }
 
     public static String getDate(long milliseconds) {

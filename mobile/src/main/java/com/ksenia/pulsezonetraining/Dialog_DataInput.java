@@ -39,7 +39,6 @@ public class Dialog_DataInput extends DialogFragment {
     private NumericEditText et_age;
     private NumericEditText et_rest_hr;
     private EditText et_max_hr;
-    //private RadioGroup radioGroupZone;
     private NumericEditText et_weight;
 
     private SignInButton googleSignInButton;
@@ -69,7 +68,6 @@ public class Dialog_DataInput extends DialogFragment {
         et_rest_hr = detailsView.findViewById(R.id.editText_RestHR);
         et_max_hr = detailsView.findViewById(R.id.editText_MaxHR);
         et_weight = detailsView.findViewById(R.id.editText_Weight);
-        //radioGroupZone = detailsView.findViewById(R.id.radioGroupZones);
         profileEmail = detailsView.findViewById(R.id.email);
         profileName = detailsView.findViewById(R.id.user_name);
         profileImage = detailsView.findViewById(R.id.image_view_profile);
@@ -172,7 +170,6 @@ public class Dialog_DataInput extends DialogFragment {
                     pulseSettings.setRestHr(restHrFieldValue);
                     pulseSettings.setMaxHr(maxHrFieldValue);
                     pulseSettings.setWeight(weightFieldValue);
-                    //pulseSettings.setZoneRadioButtonId(radioGroupZone.getCheckedRadioButtonId());
                     pulseSettings.save(getContext());
 
                    wantToCloseDialog = true;
