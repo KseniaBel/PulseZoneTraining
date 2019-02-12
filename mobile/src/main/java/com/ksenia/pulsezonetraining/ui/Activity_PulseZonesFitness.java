@@ -1,4 +1,4 @@
-package com.ksenia.pulsezonetraining;
+package com.ksenia.pulsezonetraining.ui;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -24,8 +24,9 @@ import com.dsi.ant.plugins.antplus.pcc.defines.DeviceState;
 import com.dsi.ant.plugins.antplus.pccbase.AntPluginPcc.IDeviceStateChangeReceiver;
 import com.dsi.ant.plugins.antplus.pccbase.AntPluginPcc.IPluginAccessResultReceiver;
 import com.dsi.ant.plugins.antplus.pccbase.PccReleaseHandle;
+import com.ksenia.pulsezonetraining.ui.custom.CustomChronometer;
+import com.ksenia.pulsezonetraining.R;
 import com.ksenia.pulsezonetraining.database.FitnessSQLiteDBHelper;
-import com.ksenia.pulsezonetraining.preferences.InvalidPreferenceException;
 import com.ksenia.pulsezonetraining.utils.PulseLimits;
 import com.ksenia.pulsezonetraining.preferences.PulseZoneSettings;
 import com.ksenia.pulsezonetraining.utils.PulseZoneUtils;
@@ -60,7 +61,7 @@ public class Activity_PulseZonesFitness extends Activity {
     public static final String START_TIMING = "startTiming";
     public static final String WORKOUT_TIME = "workoutTime";
     public static final String WEIGHT = "weight";
-    private static final String CHANNEL_ID = "1";
+    private static final String CHANNEL_ID = "beating_heart";
     private static final int NOTIFICATION_ID = 0;
     public static final String ZONE_BUTTON_ID = "zoneButtonId";
     private AntPlusHeartRatePcc hrPcc = null;
@@ -287,12 +288,12 @@ public class Activity_PulseZonesFitness extends Activity {
     /**
      * Switches the active view to the data display and subscribes to all the data events.
      * Starts chronometer
-     * Contains two threads: one is adding heart rate reading from the pulsometer to the shared readingsBuffer, another displays the average of readings from the readingsBuffer every 1 second
+     * Contains two threads: one is adding heart rate reading from the pulsometer to the shared readingsBuffer, another displays the average of readings from the readingsBuffer every beating_heart second
      */
     protected void subscribeToHrEvents() {
         chronometer.start();
         hrPcc.subscribeHeartRateDataEvent((estTimestamp, eventFlags, computedHeartRate, heartBeatCount, heartBeatEventTime, dataState) -> {
-            logger.info(String.format("estTimestamp:%1$s eventFlags:%2$s computedHeartRate:%3$s heartBeatCount:%4$s heartBeatEventTime:%5$s dataState:%6$s", estTimestamp, eventFlags, computedHeartRate, heartBeatCount, heartBeatEventTime, dataState));
+            logger.info(String.format("estTimestamp:%beating_heart$s eventFlags:%2$s computedHeartRate:%3$s heartBeatCount:%4$s heartBeatEventTime:%5$s dataState:%6$s", estTimestamp, eventFlags, computedHeartRate, heartBeatCount, heartBeatEventTime, dataState));
             readingsBuffer.add(computedHeartRate);
         });
         service = Executors.newSingleThreadScheduledExecutor();
@@ -358,7 +359,7 @@ public class Activity_PulseZonesFitness extends Activity {
         //intentAction.putExtra("pause","pauseWorkout");
        // intentAction.putExtra("resume", "resumeWorkout");
 
-        //PendingIntent pIntent = PendingIntent.getBroadcast(this,1, intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
+        //PendingIntent pIntent = PendingIntent.getBroadcast(this,beating_heart, intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark_normal_background)
@@ -388,7 +389,7 @@ public class Activity_PulseZonesFitness extends Activity {
                 switch(resultCode) {
                     case SUCCESS:
                         hrPcc = result;
-                        tv_status.setText(String.format("Pulse range: %d-%d", pulseLimits.getLowPulseLimit(), pulseLimits.getHighPulseLimit()));
+                        tv_status.setText(String.format( "%s\nPulse range: %d-%d", PulseZoneUtils.getZoneName(pulseSettings.getZoneRadioButtonId()), pulseLimits.getLowPulseLimit(), pulseLimits.getHighPulseLimit()));
                         subscribeToHrEvents();
                         break;
                     case CHANNEL_NOT_AVAILABLE:

@@ -12,18 +12,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.ksenia.pulsezonetraining.Activity_PulseZonesFitness"
+            android:name="com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness"
+            android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".ui.MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme"/>
         <activity
-            android:name="com.ksenia.pulsezonetraining.Activity_WorkoutStatistics"
+            android:name="com.ksenia.pulsezonetraining.ui.Activity_WorkoutStatistics"
+            android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
-            android:parentActivityName=".Activity_PulseZonesFitness"
+            android:parentActivityName=".ui.Activity_PulseZonesFitness"
             android:theme="@style/AppTheme"/>
         <activity
-            android:name="com.ksenia.pulsezonetraining.MainActivity"
+            android:name="com.ksenia.pulsezonetraining.ui.MainActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme">
             <intent-filter>

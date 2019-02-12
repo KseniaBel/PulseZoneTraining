@@ -1,4 +1,4 @@
-package com.ksenia.pulsezonetraining;
+package com.ksenia.pulsezonetraining.ui;
 
 /**
  * Created by ksenia on 30.12.18.
@@ -21,7 +21,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ksenia.pulsezonetraining.preferences.InvalidPreferenceException;
+import com.ksenia.pulsezonetraining.R;
+import com.ksenia.pulsezonetraining.ui.custom.NumericEditText;
 import com.ksenia.pulsezonetraining.preferences.PulseZoneSettings;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;

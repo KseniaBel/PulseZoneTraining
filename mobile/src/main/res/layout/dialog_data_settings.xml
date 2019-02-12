@@ -87,7 +87,7 @@
                     android:padding="10dp"
                     android:text="@string/age_text_view" />
 
-                <com.ksenia.pulsezonetraining.NumericEditText
+                <com.ksenia.pulsezonetraining.ui.custom.NumericEditText
                     android:id="@+id/editText_Age"
                     custom:max_value="130"
                     custom:min_value="1"
@@ -122,7 +122,7 @@
                     android:padding="10dp"
                     android:text="@string/weight_text_view" />
 
-                <com.ksenia.pulsezonetraining.NumericEditText
+                <com.ksenia.pulsezonetraining.ui.custom.NumericEditText
                     android:id="@+id/editText_Weight"
                     custom:max_value="300"
                     custom:min_value="30"
@@ -156,7 +156,7 @@
                     android:padding="10dp"
                     android:text="@string/restHr_text_view" />
 
-                <com.ksenia.pulsezonetraining.NumericEditText
+                <com.ksenia.pulsezonetraining.ui.custom.NumericEditText
                     android:id="@+id/editText_RestHR"
                     custom:max_value="99"
                     custom:min_value="1"

@@ -1,4 +1,4 @@
-package com.ksenia.pulsezonetraining;
+package com.ksenia.pulsezonetraining.ui.custom;
 
 import android.content.Context;
 import android.os.SystemClock;

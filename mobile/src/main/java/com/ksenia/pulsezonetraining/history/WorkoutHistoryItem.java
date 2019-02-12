@@ -1,12 +1,13 @@
-package com.ksenia.pulsezonetraining;
+package com.ksenia.pulsezonetraining.history;
+
+
+import com.ksenia.pulsezonetraining.R;
 
 /**
  * Created by ksenia on 01.02.19.
  */
 
 public class WorkoutHistoryItem {
-    //private int id;
-    private long startTime;
     private long elapsedTime;
     private String zone;
     private int totalCalories;
@@ -20,23 +21,6 @@ public class WorkoutHistoryItem {
     }
 
     private long currentTime;
-
-
-    /*public int getId() {
-        return id;
-    }*/
-
-    /*public void setId(int id) {
-        this.id = id;
-    }*/
-
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
 
     public long getElapsedTime() {
         return elapsedTime;
@@ -61,4 +45,5 @@ public class WorkoutHistoryItem {
     public void setTotalCalories(int totalCalories) {
         this.totalCalories = totalCalories;
     }
+
 }

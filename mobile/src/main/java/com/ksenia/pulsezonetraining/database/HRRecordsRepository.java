@@ -28,7 +28,7 @@ public class HRRecordsRepository {
 
 
     public int getMaxHeartRate(long startTime, long endTime) {
-        Cursor cursor = database.rawQuery("SELECT (heart_rate) FROM records WHERE time BETWEEN " + startTime + " and " + endTime, null);
+        Cursor cursor = database.rawQuery("SELECT MAX(heart_rate) FROM records WHERE time BETWEEN " + startTime + " and " + endTime, null);
         int value = 0;
         if (cursor.moveToFirst()) {
             value = cursor.getInt(0);

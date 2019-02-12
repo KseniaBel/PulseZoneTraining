@@ -1,4 +1,4 @@
-package com.ksenia.pulsezonetraining;
+package com.ksenia.pulsezonetraining.ui;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,10 +6,10 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.widget.TextView;
 
+import com.ksenia.pulsezonetraining.R;
 import com.ksenia.pulsezonetraining.database.FitnessSQLiteDBHelper;
 import com.ksenia.pulsezonetraining.database.HRRecordsRepository;
 import com.ksenia.pulsezonetraining.database.StatisticRepository;
-import com.ksenia.pulsezonetraining.preferences.PulseZoneSettings;
 import com.ksenia.pulsezonetraining.utils.PulseZoneUtils;
 
 import java.util.Date;
@@ -65,7 +65,7 @@ public class Activity_WorkoutStatistics extends Activity {
         StatisticRepository repositoryStatistic = new StatisticRepository(helper);
         Date date= new Date();
         long timestamp = date.getTime();
-        repositoryStatistic.addStatisticRecord(startTime, elapsedTime, calories, zone, timestamp);
+        repositoryStatistic.addStatisticRecord(elapsedTime, calories, zone, timestamp);
         repositoryStatistic.closeDb();
     }
 

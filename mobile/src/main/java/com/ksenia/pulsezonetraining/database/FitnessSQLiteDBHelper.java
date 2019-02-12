@@ -17,7 +17,6 @@ public class FitnessSQLiteDBHelper extends SQLiteOpenHelper {
     public static final String RECORDS_COLUMN_HR = "heart_rate";
     public static final String RECORDS_TIMESTAMP = "time";
     public static final String STATISTIC_COLUMN_ID = "id";
-    public static final String STATISTIC_START_TIME = "startTime";
     public static final String STATISTIC_ELAPSED_TIME = "elapsedTime";
     public static final String STATISTIC_CALORIES = "calories";
     public static final String STATISTIC_ZONE = "zone";
@@ -36,7 +35,6 @@ public class FitnessSQLiteDBHelper extends SQLiteOpenHelper {
                 RECORDS_TIMESTAMP + " LONG" + ")");
         db.execSQL("CREATE TABLE " + STATISTIC_TABLE_NAME + " (" +
                 STATISTIC_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                STATISTIC_START_TIME + " LONG, " +
                 STATISTIC_ELAPSED_TIME + " LONG, " +
                 STATISTIC_CALORIES + " INTEGER, " +
                 STATISTIC_ZONE + " VARCHAR, " +

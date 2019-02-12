@@ -1,4 +1,4 @@
-package com.ksenia.pulsezonetraining;
+package com.ksenia.pulsezonetraining.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -9,9 +9,8 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
-import com.ksenia.pulsezonetraining.preferences.InvalidPreferenceException;
+import com.ksenia.pulsezonetraining.R;
 import com.ksenia.pulsezonetraining.preferences.PulseZoneSettings;
 
 /**
