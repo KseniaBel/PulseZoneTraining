@@ -64,7 +64,11 @@
     <string name="zone3_radio_button">Zone 3: Aerobic(64–76%)</string>
     <string name="zone4_radio_button">Zone 4: Anaerobic Threshold(76–88%)</string>
     <string name="zone5_radio_button">Zone 5: VO2 Maximum(88–100%)</string>
-
+    <string name="bluetooth_radio_button">Bluetooth</string>
+    <string name="ant_radio_button">ANT+</string>
+    <string name="connection_text_view">Connection:</string>
+    <string name="bluetooth_devices_found">Bluetooth devices found:</string>
+    <string name="label_bluetooth">Bluetooth devices</string>
 
 
 </resources>

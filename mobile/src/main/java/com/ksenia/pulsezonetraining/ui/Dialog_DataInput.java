@@ -36,6 +36,7 @@ import com.google.android.gms.tasks.Task;
 public class Dialog_DataInput extends DialogFragment {
     private static final String TAG = "AndroidClarified";
     public static final String GOOGLE_ACCOUNT = "google_account";
+    private RadioGroup radioGroupConnection;
     private RadioGroup radioGroupGender;
     private NumericEditText et_age;
     private NumericEditText et_rest_hr;
@@ -64,6 +65,7 @@ public class Dialog_DataInput extends DialogFragment {
         View detailsView = inflater.inflate(R.layout.dialog_data_settings, null);
         builder.setView(detailsView);
 
+        radioGroupConnection = detailsView.findViewById(R.id.radioGroupConnection);
         radioGroupGender = detailsView.findViewById(R.id.radioGroupSex);
         et_age = detailsView.findViewById(R.id.editText_Age);
         et_rest_hr = detailsView.findViewById(R.id.editText_RestHR);
@@ -91,12 +93,12 @@ public class Dialog_DataInput extends DialogFragment {
 
         pulseSettings = new PulseZoneSettings();
         pulseSettings.read(getContext());
+        radioGroupConnection.check(pulseSettings.getConnectionRadioButtonId());
         radioGroupGender.check(pulseSettings.getGenderRadioButtonId());
         et_age.setText(String.valueOf(pulseSettings.getAge()));
         et_rest_hr.setText(String.valueOf(pulseSettings.getRestHr()));
         et_max_hr.setText(String.valueOf(pulseSettings.getMaxHr()));
         et_weight.setText(String.valueOf(pulseSettings.getWeight()));
-        //radioGroupZone.check(pulseSettings.getZoneRadioButtonId());
 
         return builder.create();
     }
@@ -166,6 +168,7 @@ public class Dialog_DataInput extends DialogFragment {
                     }
                     int weightFieldValue = Integer.parseInt(et_weight.getText().toString());
 
+                    pulseSettings.setConnectionRadioButtonId(radioGroupConnection.getCheckedRadioButtonId());
                     pulseSettings.setGenderRadioButtonId(radioGroupGender.getCheckedRadioButtonId());
                     pulseSettings.setAge(ageFieldValue);
                     pulseSettings.setRestHr(restHrFieldValue);

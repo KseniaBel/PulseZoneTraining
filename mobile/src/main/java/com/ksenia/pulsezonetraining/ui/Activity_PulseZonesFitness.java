@@ -15,15 +15,13 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dsi.ant.plugins.antplus.pcc.AntPlusHeartRatePcc;
-import com.dsi.ant.plugins.antplus.pcc.defines.DeviceState;
-import com.dsi.ant.plugins.antplus.pccbase.AntPluginPcc.IDeviceStateChangeReceiver;
-import com.dsi.ant.plugins.antplus.pccbase.AntPluginPcc.IPluginAccessResultReceiver;
-import com.dsi.ant.plugins.antplus.pccbase.PccReleaseHandle;
+import com.ksenia.pulsezonetraining.connectivity.ConnectivityManager;
+import com.ksenia.pulsezonetraining.connectivity.ConnectivityManagerFactory;
 import com.ksenia.pulsezonetraining.ui.custom.CustomChronometer;
 import com.ksenia.pulsezonetraining.R;
 import com.ksenia.pulsezonetraining.database.FitnessSQLiteDBHelper;
@@ -57,15 +55,18 @@ import static android.app.Notification.VISIBILITY_PUBLIC;
  * Created by ksenia on 30.12.18.
  */
 
-public class Activity_PulseZonesFitness extends Activity {
+public class Activity_PulseZonesFitness extends AppCompatActivity {
+    private static final int REQUEST_CODE_BLUETOOTH_DEVICES = 2;
+    public static final int REQUEST_ENABLE_BT = 1;
     public static final String START_TIMING = "startTiming";
     public static final String WORKOUT_TIME = "workoutTime";
     public static final String WEIGHT = "weight";
+    public static final String SCAN_RESULTS = "devicesArray";
     private static final String CHANNEL_ID = "beating_heart";
     private static final int NOTIFICATION_ID = 0;
     public static final String ZONE_BUTTON_ID = "zoneButtonId";
-    private AntPlusHeartRatePcc hrPcc = null;
-    private PccReleaseHandle<AntPlusHeartRatePcc> releaseHandle = null;
+
+
     private Logger logger = Logger.getLogger(this.getClass().getName());
     private TextView tv_status;
 
@@ -81,9 +82,10 @@ public class Activity_PulseZonesFitness extends Activity {
     private PulseZoneSettings pulseSettings;
     private CustomChronometer chronometer;
     private PulseLimits pulseLimits;
+    private ConnectivityManager connectivityManager;
 
     public final View.OnClickListener PAUSE_RESUME_ACTION = view -> {
-        if (!chronometer.isRunning() && DeviceState.TRACKING.equals(hrPcc.getCurrentDeviceState())) {
+        if (!chronometer.isRunning() && connectivityManager.isConnected()) {
             subscribeToHrEvents();
             btn_pauseResume.setImageResource(R.drawable.baseline_pause_24);
             btn_stop.setVisibility(View.GONE);
@@ -93,7 +95,6 @@ public class Activity_PulseZonesFitness extends Activity {
             btn_stop.setVisibility(View.VISIBLE);
         }
     };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,7 +124,7 @@ public class Activity_PulseZonesFitness extends Activity {
 
             FitnessSQLiteDBHelper helper = new FitnessSQLiteDBHelper(this);
             repository = new HRRecordsRepository(helper);
-            handleReset();
+            //handleReset();
 
             btn_pauseResume.setOnClickListener(PAUSE_RESUME_ACTION);
 
@@ -137,8 +138,39 @@ public class Activity_PulseZonesFitness extends Activity {
                 startActivity(intent);
                 finish();
             });
+            //deviceFound = true;
+
+        connectivityManager = ConnectivityManagerFactory.getInstance(this, getApplicationContext(), pulseSettings.getConnectionRadioButtonId());
+        connectivityManager.scanForDevices(namesOfDevices -> {
+            Intent intent = new Intent(getApplicationContext(), Activity_BluetoothDevices.class);
+            intent.putExtra(SCAN_RESULTS, namesOfDevices);
+            startActivityForResult(intent, REQUEST_CODE_BLUETOOTH_DEVICES);
+        });
+        connectivityManager.onConnectionChanged(() -> PAUSE_RESUME_ACTION.onClick(null));
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_CANCELED || resultCode == Activity.RESULT_OK) {
+                //Bluetooth not enabled.
+               finish();
+                return;
+            }
+            //result from scanner activity
+        } else if (requestCode == REQUEST_CODE_BLUETOOTH_DEVICES) {
+            if(resultCode == RESULT_OK) {
+                String deviceToConnect = data.getStringExtra(Activity_BluetoothDevices.DEVICE_TO_CONNECT_NR);
+                connectivityManager.connect(deviceToConnect);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
@@ -274,16 +306,7 @@ public class Activity_PulseZonesFitness extends Activity {
         }
     }
 
-    /**
-     * Resets the PCC connection to request access again and clears any existing display data.
-     */
-    protected void handleReset() {
-        //Release the old access if it exists
-        if(releaseHandle != null) {
-            releaseHandle.close();
-        }
-        requestAccessToPcc();
-    }
+
 
     /**
      * Switches the active view to the data display and subscribes to all the data events.
@@ -292,10 +315,7 @@ public class Activity_PulseZonesFitness extends Activity {
      */
     protected void subscribeToHrEvents() {
         chronometer.start();
-        hrPcc.subscribeHeartRateDataEvent((estTimestamp, eventFlags, computedHeartRate, heartBeatCount, heartBeatEventTime, dataState) -> {
-            logger.info(String.format("estTimestamp:%beating_heart$s eventFlags:%2$s computedHeartRate:%3$s heartBeatCount:%4$s heartBeatEventTime:%5$s dataState:%6$s", estTimestamp, eventFlags, computedHeartRate, heartBeatCount, heartBeatEventTime, dataState));
-            readingsBuffer.add(computedHeartRate);
-        });
+        connectivityManager.subscribeHREvent((reading) -> readingsBuffer.add(reading));
         service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(() -> displayReading(), 1, 1, TimeUnit.SECONDS);
     }
@@ -307,7 +327,7 @@ public class Activity_PulseZonesFitness extends Activity {
         List<Runnable> list = service.shutdownNow();
         logger.fine("Scheduled events are skiped: " + list.size());
         chronometer.stop();
-        hrPcc.subscribeHeartRateDataEvent((estTimestamp, eventFlags, computedHeartRate, heartBeatCount, heartBeatEventTime, dataState) -> {});
+        connectivityManager.unsubscribeHREvent();
     }
 
     /**
@@ -354,13 +374,6 @@ public class Activity_PulseZonesFitness extends Activity {
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        //This is the intent of PendingIntent
-        //Intent intentAction = new Intent(this, ActionReceiver.class);
-        //intentAction.putExtra("pause","pauseWorkout");
-       // intentAction.putExtra("resume", "resumeWorkout");
-
-        //PendingIntent pIntent = PendingIntent.getBroadcast(this,beating_heart, intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
-
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark_normal_background)
                 .setContentTitle("WorkoutHistoryItem")
@@ -368,8 +381,6 @@ public class Activity_PulseZonesFitness extends Activity {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 // Set the intent that will fire when the user taps the notification
                 .setContentIntent(pendingIntent)
-                //.addAction(R.drawable.baseline_pause_24, "Pause", pIntent)
-                //.addAction(R.drawable.baseline_play_arrow_24, "Resume", pIntent)
                 .setAutoCancel(true)
                 .setVisibility(VISIBILITY_PUBLIC)
                 .setCategory(Notification.CATEGORY_MESSAGE);
@@ -379,69 +390,12 @@ public class Activity_PulseZonesFitness extends Activity {
         notificationManager.notify(NOTIFICATION_ID, mBuilder.build());
     }
 
-    /**
-     * Handle the result, connecting to events on success or reporting failure to user.
-     */
-    protected IPluginAccessResultReceiver<AntPlusHeartRatePcc> base_IPluginAccessResultReceiver =
-            (result, resultCode, initialDeviceState) -> {
-                logger.info(String.format("result: %s, resultCode: %s, initialDeviceState: %s", result == null ? "null" : result.toString(), resultCode.toString(), initialDeviceState.toString()));
-                tv_status.setText(R.string.connection_string);
-                switch(resultCode) {
-                    case SUCCESS:
-                        hrPcc = result;
-                        tv_status.setText(String.format( "%s\nPulse range: %d-%d", PulseZoneUtils.getZoneName(pulseSettings.getZoneRadioButtonId()), pulseLimits.getLowPulseLimit(), pulseLimits.getHighPulseLimit()));
-                        subscribeToHrEvents();
-                        break;
-                    case CHANNEL_NOT_AVAILABLE:
-                        tv_status.setText(R.string.error_string);
-                        break;
-                    case ADAPTER_NOT_DETECTED:
-                        tv_status.setText(R.string.error_string);
-                        break;
-                    case BAD_PARAMS:
-                        tv_status.setText(R.string.error_string);
-                        break;
-                    case OTHER_FAILURE:
-                        tv_status.setText(R.string.error_string);
-                        break;
-                    case DEPENDENCY_NOT_INSTALLED:
-                        tv_status.setText(R.string.error_string);
-                        break;
-                    case USER_CANCELLED:
-                        tv_status.setText(R.string.error_string);
-                        break;
-                    case UNRECOGNIZED:
-                        tv_status.setText(R.string.error_string);
-                        break;
-                    default:
-                        break;
-                }
-            };
 
-    /**
-     * Receives state changes and shows it on the status display line
-     */
-    protected  IDeviceStateChangeReceiver base_IDeviceStateChangeReceiver =
-            (DeviceState newDeviceState) ->
-                    runOnUiThread(() -> {
-                        logger.log(Level.INFO, hrPcc.getDeviceName() + ": " + newDeviceState);
-                        PAUSE_RESUME_ACTION.onClick(null);
-                        Toast.makeText(this, "Device status changed: " + newDeviceState, Toast.LENGTH_SHORT).show();
-                    });
 
-    protected void requestAccessToPcc() {
-        Intent intent = getIntent();
-        /*if (intent.hasExtra(Activity_MultiDeviceSearchSampler.EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT)) {
-            // device has already been selected through the multi-device search
-            MultiDeviceSearch.MultiDeviceSearchResult result = intent
-                    .getParcelableExtra(Activity_MultiDeviceSearchSampler.EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT);
-            releaseHandle = AntPlusHeartRatePcc.requestAccess(this, result.getAntDeviceNumber(), 0,
-                    base_IPluginAccessResultReceiver, base_IDeviceStateChangeReceiver);
-        } else {*/
-            // starts the plugins UI search
-            releaseHandle = AntPlusHeartRatePcc.requestAccess(this, this,
-                    base_IPluginAccessResultReceiver, base_IDeviceStateChangeReceiver);
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
     /**
@@ -449,15 +403,13 @@ public class Activity_PulseZonesFitness extends Activity {
      */
     @Override
     protected void onDestroy() {
-        if(!(service == null) ) {
+        if(service != null) {
             List<Runnable> list = service.shutdownNow();
             logger.fine("Scheduled events are skipped: " + list.size());
         }
         chronometer.stop();
         repository.closeDb();
-        if(!(hrPcc == null)) {
-            hrPcc.releaseAccess();
-        }
+        connectivityManager.disconnect();
         super.onDestroy();
     }
 }

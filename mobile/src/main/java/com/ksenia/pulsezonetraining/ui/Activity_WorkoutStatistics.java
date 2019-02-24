@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.ksenia.pulsezonetraining.R;
@@ -18,7 +20,7 @@ import java.util.Date;
  * Created by ksenia on 09.01.19.
  */
 
-public class Activity_WorkoutStatistics extends Activity {
+public class Activity_WorkoutStatistics extends AppCompatActivity {
     public static final String START_TIME= "startTime";
     public static final String WORKOUT_TIME = "workoutTime";
     public static final String CALORIES = "calories";

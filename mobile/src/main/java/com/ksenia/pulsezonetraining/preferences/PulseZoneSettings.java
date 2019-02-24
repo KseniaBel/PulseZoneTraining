@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 public class PulseZoneSettings {
     private static final String PARAM_APP_PREFERENCES = "prefID";
+    private int connectionRadioButtonId;
     private int genderRadioButtonId;
     private int age;
     private int restHr;
@@ -25,6 +26,7 @@ public class PulseZoneSettings {
 
     public void read(Context context)  {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PARAM_APP_PREFERENCES, Context.MODE_PRIVATE);
+        this.connectionRadioButtonId = Preferences.CONNECTION_KEY.getValue(sharedPreferences);
         this.genderRadioButtonId = Preferences.USER_SEX_KEY.getValue(sharedPreferences);
         this.age = Preferences.AGE_KEY.getValue(sharedPreferences);
         this.restHr = Preferences.REST_HR_KEY.getValue(sharedPreferences);
@@ -32,6 +34,11 @@ public class PulseZoneSettings {
         this.zoneRadioButtonId = Preferences.PULSE_ZONE_KEY.getValue(sharedPreferences);
         this.weight = Preferences.WEIGHT_KEY.getValue(sharedPreferences);
     }
+
+    public void setConnectionRadioButtonId(int connectionRadioButtonId) {
+        this.connectionRadioButtonId = connectionRadioButtonId;
+    }
+
     /**
      * Setts genderRadioButtonId
      * @param genderRadioButtonId - genderRadioButtonId int value
@@ -39,7 +46,6 @@ public class PulseZoneSettings {
     public void setGenderRadioButtonId(int genderRadioButtonId) {
         this.genderRadioButtonId = genderRadioButtonId;
     }
-
     /**
      * Setts age
      * @param age - age int value
@@ -88,6 +94,10 @@ public class PulseZoneSettings {
         return genderRadioButtonId == R.id.radioButton_Female;
     }
 
+
+    public int getConnectionRadioButtonId() {
+        return connectionRadioButtonId;
+    }
 
     /**
      * Getter method for genderRadioButtonId
@@ -138,11 +148,12 @@ public class PulseZoneSettings {
     }
 
     /**
-     * Saves values of genderRadioButtonId, age. rest hr, maximum hr, pulse zoneRadioButtonId in shared preferences
+     * Saves values of genderRadioButtonId, connectionRadioButtonId, age, rest hr, maximum hr, pulse zoneRadioButtonId in shared preferences
      */
     public void save(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PARAM_APP_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(Preferences.CONNECTION_KEY.toString(), connectionRadioButtonId);
         editor.putInt(Preferences.USER_SEX_KEY.toString(), genderRadioButtonId);
         editor.putInt(Preferences.AGE_KEY.toString(), age);
         editor.putInt(Preferences.REST_HR_KEY.toString(), restHr);
@@ -166,6 +177,20 @@ public class PulseZoneSettings {
     }
 
     enum Preferences {
+        CONNECTION_KEY("connectionKey") {
+            @Override
+            public int getValue(SharedPreferences prefs)  {
+                this.value = prefs.getInt(Preferences.CONNECTION_KEY.toString(), R.id.radioButton_Bluetooth);
+                return super.getValue(prefs);
+            }
+            @Override
+            public void validate(SharedPreferences prefs) throws InvalidPreferenceException{
+                int gender = getValue(prefs);
+                if ((gender != R.id.radioButton_Bluetooth) && (gender != R.id.radioButton_ANT)) {
+                    super.validate(prefs);
+                }
+            }
+        },
         USER_SEX_KEY ("userSexKey") {
             @Override
             public int getValue(SharedPreferences prefs)  {
@@ -266,28 +291,5 @@ public class PulseZoneSettings {
         public int getValue(SharedPreferences prefs) {
             return value;
         }
-        /*public static int getAge(SharedPreferences prefs) {
-            return prefs.getInt(Preferences.AGE_KEY.toString(), 0);
-        }
-
-        public static int getUserSex(SharedPreferences prefs) {
-            return prefs.getInt(Preferences.USER_SEX_KEY.toString(), R.id.radioButton_Female);
-        }
-
-        public static int getRestHr(SharedPreferences prefs) {
-            return prefs.getInt(Preferences.REST_HR_KEY.toString(), 0);
-        }
-
-        public static int getMaxHr(SharedPreferences prefs) {
-            return prefs.getInt(Preferences.MAX_HR_KEY.toString(), 0);
-        }
-
-        public static int getPulseZone(SharedPreferences prefs) {
-            return prefs.getInt(Preferences.PULSE_ZONE_KEY.toString(), R.id.radioButton_Zone1);
-        }
-
-        public static int getWeight(SharedPreferences pref) {
-            return pref.getInt(Preferences.WEIGHT_KEY.toString(), 0);
-        }*/
     }
 }

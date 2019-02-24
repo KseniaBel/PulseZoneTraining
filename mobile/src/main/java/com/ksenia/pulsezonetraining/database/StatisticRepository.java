@@ -45,10 +45,10 @@ public class StatisticRepository {
             do {
                 List<WorkoutHistoryItem> workoutItems = new ArrayList<>();
                 WorkoutHistoryItem workoutHistoryItem = new WorkoutHistoryItem();
-                workoutHistoryItem.setElapsedTime(cursor.getLong(cursor.getColumnIndex("elapsedTime")));
-                workoutHistoryItem.setTotalCalories(cursor.getInt(cursor.getColumnIndex("calories")));
-                workoutHistoryItem.setZone(cursor.getString(cursor.getColumnIndex("zone")));
-                workoutHistoryItem.setCurrentTime(cursor.getLong(cursor.getColumnIndex("currentTime")));
+                workoutHistoryItem.setElapsedTime(cursor.getLong(cursor.getColumnIndex(FitnessSQLiteDBHelper.STATISTIC_ELAPSED_TIME)));
+                workoutHistoryItem.setTotalCalories(cursor.getInt(cursor.getColumnIndex(FitnessSQLiteDBHelper.STATISTIC_CALORIES)));
+                workoutHistoryItem.setZone(cursor.getString(cursor.getColumnIndex(FitnessSQLiteDBHelper.STATISTIC_ZONE)));
+                workoutHistoryItem.setCurrentTime(cursor.getLong(cursor.getColumnIndex(FitnessSQLiteDBHelper.STATISTIC_TIMESTAMP)));
                 String date = cursor.getString(cursor.getColumnIndex("date"));
                 if(list.containsKey(date)) {
                     workoutItems = list.get(date);

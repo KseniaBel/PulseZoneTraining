@@ -28,7 +28,7 @@ public class Dialog_ZoneInput extends DialogFragment {
                     pulseSettings.setZoneRadioButtonId(radioGroupZone.getCheckedRadioButtonId());
                     pulseSettings.save(getContext());
                     Intent intent = new Intent(getActivity(), Activity_PulseZonesFitness.class);
-                    startActivity(intent);
+                    getActivity().startActivity(intent);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
                     //Let dialog dismiss

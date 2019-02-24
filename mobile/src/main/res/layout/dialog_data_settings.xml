@@ -22,6 +22,56 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingBottom="3dp"
+                android:paddingEnd="10dp"
+                android:paddingStart="5dp"
+                android:paddingTop="3dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="5dp"
+                    android:layout_toStartOf="@+id/radioGroupConnection"
+                    android:padding="10dp"
+                    android:text="@string/connection_text_view"
+                    android:textColor="@color/textColorPrimary" />
+
+                <RadioGroup
+                    android:id="@+id/radioGroupConnection"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:orientation="horizontal"
+                    android:paddingBottom="3dp"
+                    android:paddingEnd="10dp"
+                    android:paddingStart="5dp"
+                    android:paddingTop="3dp">
+
+                    <RadioButton
+                        android:id="@+id/radioButton_Bluetooth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:checked="true"
+                        android:text="@string/bluetooth_radio_button" />
+
+                    <RadioButton
+                        android:id="@+id/radioButton_ANT"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/ant_radio_button" />
+
+                </RadioGroup>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:background="#D7D7D7"
                 android:paddingBottom="3dp"
                 android:paddingEnd="10dp"
@@ -36,7 +86,8 @@
                     android:layout_marginEnd="5dp"
                     android:layout_toStartOf="@+id/radioGroupSex"
                     android:padding="10dp"
-                    android:text="@string/gender_text_view" />
+                    android:text="@string/gender_text_view"
+                    android:textColor="@color/textColorPrimary" />
 
                 <RadioGroup
                     android:id="@+id/radioGroupSex"
@@ -85,7 +136,8 @@
                     android:layout_marginEnd="5dp"
                     android:layout_toStartOf="@id/editText_Age"
                     android:padding="10dp"
-                    android:text="@string/age_text_view" />
+                    android:text="@string/age_text_view"
+                    android:textColor="@color/textColorPrimary" />
 
                 <com.ksenia.pulsezonetraining.ui.custom.NumericEditText
                     android:id="@+id/editText_Age"
@@ -120,7 +172,8 @@
                     android:layout_marginEnd="5dp"
                     android:layout_toStartOf="@id/editText_Weight"
                     android:padding="10dp"
-                    android:text="@string/weight_text_view" />
+                    android:text="@string/weight_text_view"
+                    android:textColor="@color/textColorPrimary" />
 
                 <com.ksenia.pulsezonetraining.ui.custom.NumericEditText
                     android:id="@+id/editText_Weight"
@@ -154,7 +207,8 @@
                     android:layout_marginEnd="5dp"
                     android:layout_toStartOf="@+id/editText_RestHR"
                     android:padding="10dp"
-                    android:text="@string/restHr_text_view" />
+                    android:text="@string/restHr_text_view"
+                    android:textColor="@color/textColorPrimary" />
 
                 <com.ksenia.pulsezonetraining.ui.custom.NumericEditText
                     android:id="@+id/editText_RestHR"
@@ -187,9 +241,10 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="5dp"
+                    android:layout_toStartOf="@+id/editText_MaxHR"
                     android:padding="10dp"
                     android:text="@string/maxHr_text_view"
-                    android:layout_toStartOf="@+id/editText_MaxHR"/>
+                    android:textColor="@color/textColorPrimary" />
 
                 <EditText
                     android:id="@+id/editText_MaxHR"
