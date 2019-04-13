@@ -19,22 +19,14 @@ All rights reserved.
     android:orientation="vertical"
     tools:context=".ui.Activity_PulseZonesFitness">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/app_bar_workout"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_workout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar_workout"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
-
-        </android.support.v7.widget.Toolbar>
-
-    </android.support.design.widget.AppBarLayout>
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        app:layout_constraintTop_toTopOf="parent">
+    </android.support.v7.widget.Toolbar>
 
     <TextView
         android:id="@+id/textView_ZoneStatus"
@@ -49,7 +41,7 @@ All rights reserved.
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/app_bar_workout" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_workout" />
 
     <ScrollView
         android:id="@+id/scrollView"
