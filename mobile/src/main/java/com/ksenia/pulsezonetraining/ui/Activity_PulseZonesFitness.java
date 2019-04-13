@@ -347,6 +347,10 @@ public class Activity_PulseZonesFitness extends AppCompatActivity implements Obs
         int sum = 0;
         //calculate the average of the readings from shared readingBuffer in synchronized way
         synchronized (readingsBuffer) {
+            if (readingsBuffer.isEmpty()) {
+                return;
+            }
+
             for(Integer i : readingsBuffer) {
                 sum += i;
             }
@@ -409,11 +413,14 @@ public class Activity_PulseZonesFitness extends AppCompatActivity implements Obs
     public void update(Observable o, Object arg) {
         Event event = (Event) arg;
         if(event.getEventType().equals(Event.Type.STATUS)) {
-            if (event.getMessage().equals("connected") && !chronometer.isRunning()) {
-                resume();
-            } else if (event.getMessage().equals("disconnected") && chronometer.isRunning()) {
-                pause();
-            }
+            runOnUiThread(() ->
+            {
+                if (event.getMessage().equals("connected") && !chronometer.isRunning()) {
+                    resume();
+                } else if (event.getMessage().equals("disconnected") && chronometer.isRunning()) {
+                    pause();
+                }
+            });
         } else if(event.getEventType().equals(Event.Type.READING)) {
             readingsBuffer.add((Integer) event.getMessage());
             readingsBuffer.notifyAll();

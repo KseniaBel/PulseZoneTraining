@@ -169,7 +169,7 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
 
     @Override
     public void notifyObservers(Object arg) {
-        this.setChanged();
+        setChanged();
         super.notifyObservers(arg);
     }
 
