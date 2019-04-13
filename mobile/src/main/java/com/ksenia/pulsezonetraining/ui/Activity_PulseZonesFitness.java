@@ -16,12 +16,17 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dsi.ant.plugins.antplus.pccbase.MultiDeviceSearch;
 import com.ksenia.pulsezonetraining.connectivity.ConnectivityManager;
 import com.ksenia.pulsezonetraining.connectivity.ConnectivityManagerFactory;
+import com.ksenia.pulsezonetraining.connectivity.Event;
 import com.ksenia.pulsezonetraining.ui.custom.CustomChronometer;
 import com.ksenia.pulsezonetraining.R;
 import com.ksenia.pulsezonetraining.database.FitnessSQLiteDBHelper;
@@ -43,6 +48,9 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -50,13 +58,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static android.app.Notification.VISIBILITY_PUBLIC;
+import static com.ksenia.pulsezonetraining.ui.Activity_MultiDeviceSearchSampler.EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT;
 
 /**
  * Created by ksenia on 30.12.18.
  */
 
-public class Activity_PulseZonesFitness extends AppCompatActivity {
-    private static final int REQUEST_CODE_BLUETOOTH_DEVICES = 2;
+public class Activity_PulseZonesFitness extends AppCompatActivity implements Observer {
+    public static final int REQUEST_CODE_BLUETOOTH_DEVICES = 2;
+    public static final int REQUEST_CODE_ANT_DEVICES = 3;
     public static final int REQUEST_ENABLE_BT = 1;
     public static final String START_TIMING = "startTiming";
     public static final String WORKOUT_TIME = "workoutTime";
@@ -69,7 +79,6 @@ public class Activity_PulseZonesFitness extends AppCompatActivity {
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
     private TextView tv_status;
-
     private TextView tv_heartRate;
     private FloatingActionButton btn_pauseResume;
     private FloatingActionButton btn_stop;
@@ -78,23 +87,13 @@ public class Activity_PulseZonesFitness extends AppCompatActivity {
     private ScheduledExecutorService service;
     private LineChart graph;
     private HRRecordsRepository repository;
+    private boolean isVibrationDisable;
 
     private PulseZoneSettings pulseSettings;
     private CustomChronometer chronometer;
     private PulseLimits pulseLimits;
     private ConnectivityManager connectivityManager;
 
-    public final View.OnClickListener PAUSE_RESUME_ACTION = view -> {
-        if (!chronometer.isRunning() && connectivityManager.isConnected()) {
-            subscribeToHrEvents();
-            btn_pauseResume.setImageResource(R.drawable.baseline_pause_24);
-            btn_stop.setVisibility(View.GONE);
-        }else{
-            unsubscribeToHrEvents();
-            btn_pauseResume.setImageResource(R.drawable.baseline_play_arrow_24);
-            btn_stop.setVisibility(View.VISIBLE);
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +105,9 @@ public class Activity_PulseZonesFitness extends AppCompatActivity {
             pulseLimits = PulseZoneUtils.calculateZonePulse(pulseSettings);
             logger.info("low: " + pulseLimits.getLowPulseLimit() + " high: " + pulseLimits.getHighPulseLimit());
             readingsBuffer = Collections.synchronizedList(new ArrayList<>());
+
+            Toolbar toolbar = findViewById(R.id.toolbar_workout);
+            setSupportActionBar(toolbar);
 
             tv_status = findViewById(R.id.textView_ZoneStatus);
             tv_heartRate = findViewById(R.id.textView_HeartRatePulseZone);
@@ -126,10 +128,15 @@ public class Activity_PulseZonesFitness extends AppCompatActivity {
             repository = new HRRecordsRepository(helper);
             //handleReset();
 
-            btn_pauseResume.setOnClickListener(PAUSE_RESUME_ACTION);
+            btn_pauseResume.setOnClickListener(v -> {
+                if(connectivityManager.isConnected() && chronometer.isRunning()) {
+                    pause();
+                } else if(connectivityManager.isConnected() && !chronometer.isRunning()) {
+                    resume();
+                }
+            });
 
             btn_stop.setOnClickListener(view -> {
-                unsubscribeToHrEvents();
                 Intent intent = new Intent(this, Activity_WorkoutStatistics.class);
                 intent.putExtra(START_TIMING, chronometer.getStartTime());
                 intent.putExtra(WORKOUT_TIME, chronometer.getText());
@@ -138,35 +145,60 @@ public class Activity_PulseZonesFitness extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             });
-            //deviceFound = true;
 
         connectivityManager = ConnectivityManagerFactory.getInstance(this, getApplicationContext(), pulseSettings.getConnectionRadioButtonId());
-        connectivityManager.scanForDevices(namesOfDevices -> {
-            Intent intent = new Intent(getApplicationContext(), Activity_BluetoothDevices.class);
-            intent.putExtra(SCAN_RESULTS, namesOfDevices);
-            startActivityForResult(intent, REQUEST_CODE_BLUETOOTH_DEVICES);
-        });
-        connectivityManager.onConnectionChanged(() -> PAUSE_RESUME_ACTION.onClick(null));
+        connectivityManager.addObserver(this);
+        connectivityManager.scanForDevices();
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_training, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        //noinspection SimplifiableIfStatement
+        if (item.getTitle().equals("Turn OFF vibration")) {
+            isVibrationDisable = true;
+            item.setTitle("Turn ON vibration");
+        } else {
+            isVibrationDisable = false;
+            item.setTitle("Turn OFF vibration");
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_ENABLE_BT) {
-            if (resultCode == Activity.RESULT_CANCELED || resultCode == Activity.RESULT_OK) {
+            if (resultCode == Activity.RESULT_CANCELED) {
                 //Bluetooth not enabled.
                finish();
                 return;
+            } else if(resultCode == Activity.RESULT_OK) {
+                connectivityManager.scanForDevices();
             }
             //result from scanner activity
         } else if (requestCode == REQUEST_CODE_BLUETOOTH_DEVICES) {
             if(resultCode == RESULT_OK) {
                 String deviceToConnect = data.getStringExtra(Activity_BluetoothDevices.DEVICE_TO_CONNECT_NR);
                 connectivityManager.connect(deviceToConnect);
+            } else {
+                finish();
+                return;
+            }
+        } else if(requestCode == REQUEST_CODE_ANT_DEVICES) {
+            if(resultCode == RESULT_OK) {
+                MultiDeviceSearch.MultiDeviceSearchResult result = data.getParcelableExtra(EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT);
+                connectivityManager.connect(String.valueOf(result.getAntDeviceNumber()));
+            } else {
+                finish();
+                return;
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -306,34 +338,11 @@ public class Activity_PulseZonesFitness extends AppCompatActivity {
         }
     }
 
-
-
-    /**
-     * Switches the active view to the data display and subscribes to all the data events.
-     * Starts chronometer
-     * Contains two threads: one is adding heart rate reading from the pulsometer to the shared readingsBuffer, another displays the average of readings from the readingsBuffer every beating_heart second
-     */
-    protected void subscribeToHrEvents() {
-        chronometer.start();
-        connectivityManager.subscribeHREvent((reading) -> readingsBuffer.add(reading));
-        service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleAtFixedRate(() -> displayReading(), 1, 1, TimeUnit.SECONDS);
-    }
-
-    /**
-     * Stop all the threads and chronometer
-     */
-    protected void unsubscribeToHrEvents() {
-        List<Runnable> list = service.shutdownNow();
-        logger.fine("Scheduled events are skiped: " + list.size());
-        chronometer.stop();
-        connectivityManager.unsubscribeHREvent();
-    }
-
     /**
      * Computes the average of heart rate and runs the UI thread, that displays info and adds new record in DB
      */
     private void displayReading() {
+        logger.entering(this.getClass().toString(), "displayReading");
         int computedHeartRate;
         int sum = 0;
         //calculate the average of the readings from shared readingBuffer in synchronized way
@@ -343,20 +352,18 @@ public class Activity_PulseZonesFitness extends AppCompatActivity {
             }
             computedHeartRate = Math.round(sum/readingsBuffer.size());
             readingsBuffer.clear();
-
+            readingsBuffer.notifyAll();
         }
-        // Mark heart rate with asterisk if zero detected
-        final String textHeartRate = String.valueOf(computedHeartRate);
 
-        runOnUiThread(() -> {
-            addEntry(chronometer.getElapsedTime()/1000, computedHeartRate);
-            repository.addNewRecord(computedHeartRate);
-            tv_heartRate.setText(textHeartRate);
+        addEntry(chronometer.getElapsedTime()/1000, computedHeartRate);
+        repository.addNewRecord(computedHeartRate);
+        tv_heartRate.setText(String.valueOf(computedHeartRate));
 
-            //Create notification
-            CharSequence timer = chronometer.getText();
-            presentNotification(computedHeartRate, timer);
+        //Create notification
+        CharSequence timer = chronometer.getText();
+        presentNotification(computedHeartRate, timer);
 
+        if(!isVibrationDisable) {
             //Set vibration
             if(computedHeartRate > pulseLimits.getHighPulseLimit() || computedHeartRate < pulseLimits.getLowPulseLimit()) {
                 // Get instance of Vibrator from current Context
@@ -365,7 +372,7 @@ public class Activity_PulseZonesFitness extends AppCompatActivity {
                 // Vibrate for 75 milliseconds
                 mVibrator.vibrate(75);
             }
-        });
+        }
     }
 
     private void presentNotification(int heartRate, CharSequence timer) {
@@ -397,6 +404,39 @@ public class Activity_PulseZonesFitness extends AppCompatActivity {
         super.onBackPressed();
         finish();
     }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        Event event = (Event) arg;
+        if(event.getEventType().equals(Event.Type.STATUS)) {
+            if (event.getMessage().equals("connected") && !chronometer.isRunning()) {
+                resume();
+            } else if (event.getMessage().equals("disconnected") && chronometer.isRunning()) {
+                pause();
+            }
+        } else if(event.getEventType().equals(Event.Type.READING)) {
+            readingsBuffer.add((Integer) event.getMessage());
+            readingsBuffer.notifyAll();
+        }
+    }
+
+    public void pause() {
+            List<Runnable> list = service.shutdownNow();
+            chronometer.stop();
+            btn_pauseResume.setImageResource(R.drawable.baseline_play_arrow_24);
+            btn_stop.setVisibility(View.VISIBLE);
+        }
+    public void resume(){
+
+            chronometer.start();
+            service = Executors.newSingleThreadScheduledExecutor();
+            service.scheduleAtFixedRate(() -> runOnUiThread(
+                    () -> displayReading()
+            ), 1, 1, TimeUnit.SECONDS);
+            btn_pauseResume.setImageResource(R.drawable.baseline_pause_24);
+            btn_stop.setVisibility(View.GONE);
+    }
+
 
     /**
      * Actions on Destroying the activity

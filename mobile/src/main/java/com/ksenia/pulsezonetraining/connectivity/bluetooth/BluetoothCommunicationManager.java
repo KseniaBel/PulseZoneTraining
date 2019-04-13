@@ -21,7 +21,9 @@ import android.widget.Toast;
 
 import com.ksenia.pulsezonetraining.connectivity.ConnectivityManager;
 import com.ksenia.pulsezonetraining.connectivity.DevicesNamesConsumer;
+import com.ksenia.pulsezonetraining.connectivity.Event;
 import com.ksenia.pulsezonetraining.connectivity.ReadingEventConsumer;
+import com.ksenia.pulsezonetraining.ui.Activity_BluetoothDevices;
 import com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness;
 
 import java.util.ArrayList;
@@ -33,7 +35,9 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import static android.support.constraint.Constraints.TAG;
+import static com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness.REQUEST_CODE_BLUETOOTH_DEVICES;
 import static com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness.REQUEST_ENABLE_BT;
+import static com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness.SCAN_RESULTS;
 
 /**
  * Created by ksenia on 17.02.19.
@@ -68,12 +72,13 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
 
 
     @Override
-    public void scanForDevices(DevicesNamesConsumer<String[]> devicesNamesConsumer) {
+    public void scanForDevices() {
         //Checks if BLE is supported
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(activity, "BLE not supported on this device", Toast.LENGTH_SHORT).show();
+            activity.finish();
             throw new UnsupportedOperationException("BLE Not Supported");
         }
-
         //Checks for bluetooth and location permissions and requests missing permissions
         if (mScanning) {
             return;
@@ -85,6 +90,11 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
             Log.d(TAG, "Requested user enables Bluetooth. Try starting the scan again.");
             Toast.makeText(activity, "Application requires Bluetooth and GPS connections", Toast.LENGTH_SHORT).show();
         } else {
+            DevicesNamesConsumer<String[]> devicesNamesConsumer = namesOfDevices -> {
+                Intent intent = new Intent(context, Activity_BluetoothDevices.class);
+                intent.putExtra(SCAN_RESULTS, namesOfDevices);
+                activity.startActivityForResult(intent, REQUEST_CODE_BLUETOOTH_DEVICES);
+            };
             disconnectGattServer();
 
             //Scanning for devices with HR service UUID during 10 sec
@@ -103,24 +113,6 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
             mScanning = true;
             mHandler = new Handler();
             mHandler.postDelayed(() -> this.stopScan(devicesNamesConsumer), SCAN_PERIOD);
-        }
-    }
-
-    @Override
-    public boolean isConnected() {
-        return mConnected;
-    }
-
-
-    @Override
-    public void connect(String deviceToConnect) {
-        for(BluetoothDevice device: mScanResults.values()) {
-            if(device.getName().equals(deviceToConnect)) {
-                logger.info("Connecting to " + device.getAddress());
-                GattClientCallback gattClientCallback = new GattClientCallback(this);
-                mGatt = device.connectGatt(context, false, gattClientCallback);
-                return;
-            }
         }
     }
 
@@ -152,9 +144,21 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
         mHandler = null;
     }
 
+    @Override
+    public void connect(String deviceToConnect) {
+        for(BluetoothDevice device: mScanResults.values()) {
+            if(device.getName().equals(deviceToConnect)) {
+                logger.info("Connecting to " + device.getAddress());
+                GattClientCallback gattClientCallback = new GattClientCallback(this);
+                mGatt = device.connectGatt(context, false, gattClientCallback);
+                return;
+            }
+        }
+    }
 
     public void disconnectGattServer() {
         logger.info("Closing Gatt connection");
+        notifyObservers(new Event(Event.Type.STATUS, "disconnected"));
         mConnected = false;
         //mEchoInitialized = false;
         if (mGatt != null) {
@@ -163,14 +167,22 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
         }
     }
 
-    public void setConnected(boolean connected) {
-        mConnected = connected;
+    @Override
+    public void notifyObservers(Object arg) {
+        this.setChanged();
+        super.notifyObservers(arg);
     }
 
-
-    protected ReadingEventConsumer<Integer> getEventConsumer() {
-        return super.eventConsumer;
+    @Override
+    public boolean isConnected() {
+        return mConnected;
     }
+
+    public void connectGattServer() {
+        mConnected = true;
+        notifyObservers(new Event(Event.Type.STATUS, "connected"));
+    }
+
 
     @Override
     public void disconnect() {
@@ -180,4 +192,6 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
         mGatt.close();
         mGatt = null;
     }
+
+
 }

@@ -1,6 +1,10 @@
 package com.ksenia.pulsezonetraining.ui;
 
 import android.content.Intent;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ScaleDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -36,6 +40,8 @@ public class Activity_BluetoothDevices extends AppCompatActivity {
         String[] results = intent.getStringArrayExtra(Activity_PulseZonesFitness.SCAN_RESULTS);
 
         listView = findViewById(R.id.list_of_devices);
+        listView.setDivider(getDrawable(R.drawable.divider));
+        listView.setDividerHeight(2);
         ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this, R.layout.devices_list_item, R.id.device_name, results);
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener((parent, view, position, id) -> {

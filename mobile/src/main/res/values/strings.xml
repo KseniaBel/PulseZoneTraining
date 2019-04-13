@@ -64,11 +64,32 @@
     <string name="zone3_radio_button">Zone 3: Aerobic(64–76%)</string>
     <string name="zone4_radio_button">Zone 4: Anaerobic Threshold(76–88%)</string>
     <string name="zone5_radio_button">Zone 5: VO2 Maximum(88–100%)</string>
+
+
     <string name="bluetooth_radio_button">Bluetooth</string>
     <string name="ant_radio_button">ANT+</string>
     <string name="connection_text_view">Connection:</string>
     <string name="bluetooth_devices_found">Bluetooth devices found:</string>
     <string name="label_bluetooth">Bluetooth devices</string>
 
+    <string name="label_alreadyConnected">Already Connected Devices:</string>
+    <string name="label_foundDevices">ANT+ devices found:</string>
+    <string name="label_multidevice">ANT+ multidevice search</string>
+    <string name="label_pulsezonefitness">Workout in progress</string>
+    <string name="label_workoutstatistics">Workout statistics</string>
+    <string-array name="device_types">
+        <item>Bike Power</item>
+        <item>Controllable Device</item>
+        <item>Fitness Equipment</item>
+        <item>Blood Pressure</item>
+        <item>Geocache</item>
+        <item>Environment</item>
+        <item>Weight Scale</item>
+        <item>Heart Rate</item>
+        <item>Bike Speed and Cadence</item>
+        <item>Bike Cadence</item>
+        <item>Bike Speed</item>
+        <item>Stride-based Speed and Distance</item>
+    </string-array>
 
 </resources>

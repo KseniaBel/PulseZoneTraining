@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 
 import com.ksenia.pulsezonetraining.R;
+import com.ksenia.pulsezonetraining.connectivity.ant.AntCommunicationManager;
 import com.ksenia.pulsezonetraining.connectivity.bluetooth.BluetoothCommunicationManager;
 
 /**
@@ -16,7 +17,7 @@ public class ConnectivityManagerFactory {
             if (buttonId == R.id.radioButton_Bluetooth) {
                 return new BluetoothCommunicationManager(context, activity);
             } else if(buttonId == R.id.radioButton_ANT) {
-                return new BluetoothCommunicationManager(context, activity);
+                return new AntCommunicationManager(context, activity);
             }
             return  null;
     }

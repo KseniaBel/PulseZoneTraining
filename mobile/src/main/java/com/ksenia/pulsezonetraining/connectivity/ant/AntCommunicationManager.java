@@ -14,10 +14,16 @@ import com.ksenia.pulsezonetraining.R;
 import com.ksenia.pulsezonetraining.connectivity.ConnectivityManager;
 import com.ksenia.pulsezonetraining.connectivity.DevicesNamesConsumer;
 import com.ksenia.pulsezonetraining.connectivity.ReadingEventConsumer;
+import com.ksenia.pulsezonetraining.preferences.PulseZoneSettings;
+import com.ksenia.pulsezonetraining.ui.Activity_MultiDeviceSearchSampler;
+import com.ksenia.pulsezonetraining.utils.PulseLimits;
 import com.ksenia.pulsezonetraining.utils.PulseZoneUtils;
 
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness.REQUEST_CODE_ANT_DEVICES;
 
 /**
  * Created by ksenia on 21.02.19.
@@ -25,29 +31,26 @@ import java.util.logging.Logger;
 
 public class AntCommunicationManager extends ConnectivityManager {
     public static final String EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT = "com.dsi.ant.antplus.pluginsampler.multidevicesearch.result";
+
     private Logger logger = Logger.getLogger(this.getClass().getName());
     private AntPlusHeartRatePcc hrPcc = null;
     private PccReleaseHandle<AntPlusHeartRatePcc> releaseHandle = null;
+    private String status;
 
     public AntCommunicationManager(Context context, Activity activity) {
         super(context, activity);
     }
 
     @Override
+    public void scanForDevices() {
+        Intent enableBtIntent = new Intent(context, Activity_MultiDeviceSearchSampler.class);
+        activity.startActivityForResult(enableBtIntent, REQUEST_CODE_ANT_DEVICES);
+    }
+
+    @Override
     public void connect(String device) {
-
-    }
-
-    @Override
-    public void disconnect() {
-        if(hrPcc != null) {
-            hrPcc.releaseAccess();
-        }
-    }
-
-    @Override
-    public void scanForDevices(DevicesNamesConsumer<String[]> devicesNamesConsumer) {
-
+        handleReset();
+        requestAccessToPcc(Integer.parseInt(device));
     }
 
     @Override
@@ -55,12 +58,12 @@ public class AntCommunicationManager extends ConnectivityManager {
         return DeviceState.TRACKING.equals(hrPcc.getCurrentDeviceState());
     }
 
-    @Override
+//    @Override
     public void unsubscribeHREvent() {
         hrPcc.subscribeHeartRateDataEvent((estTimestamp, eventFlags, computedHeartRate, heartBeatCount, heartBeatEventTime, dataState) -> {});
     }
 
-    @Override
+//    @Override
     public void subscribeHREvent(ReadingEventConsumer<Integer> consumer) {
         hrPcc.subscribeHeartRateDataEvent((estTimestamp, eventFlags, computedHeartRate, heartBeatCount, heartBeatEventTime, dataState) -> {
             logger.info(String.format("estTimestamp:%beating_heart$s eventFlags:%2$s computedHeartRate:%3$s heartBeatCount:%4$s heartBeatEventTime:%5$s dataState:%6$s", estTimestamp, eventFlags, computedHeartRate, heartBeatCount, heartBeatEventTime, dataState));
@@ -77,22 +80,23 @@ public class AntCommunicationManager extends ConnectivityManager {
         if(releaseHandle != null) {
             releaseHandle.close();
         }
-        requestAccessToPcc();
+        //requestAccessToPcc();
     }
 
-    protected void requestAccessToPcc() {
-        Intent intent = activity.getIntent();
-        if (intent.hasExtra(EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT)) {
+    protected void requestAccessToPcc(int deviceNumber) {
+        //Intent intent = activity.getIntent();
+        //if (intent.hasExtra(EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT)) {
             // device has already been selected through the multi-device search
-            MultiDeviceSearch.MultiDeviceSearchResult result = intent
-                    .getParcelableExtra(EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT);
-            releaseHandle = AntPlusHeartRatePcc.requestAccess(context, result.getAntDeviceNumber(), 0,
+            //MultiDeviceSearch.MultiDeviceSearchResult result = intent
+                   // .getParcelableExtra(EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT);
+
+            releaseHandle = AntPlusHeartRatePcc.requestAccess(context, deviceNumber, 0,
                     base_IPluginAccessResultReceiver, base_IDeviceStateChangeReceiver);
-        } else {
+        //} else {
             // starts the plugins UI search
-            releaseHandle = AntPlusHeartRatePcc.requestAccess(activity, context,
-                    base_IPluginAccessResultReceiver, base_IDeviceStateChangeReceiver);
-        }
+           // releaseHandle = AntPlusHeartRatePcc.requestAccess(activity, context,
+            //        base_IPluginAccessResultReceiver, base_IDeviceStateChangeReceiver);
+       // }
     }
 
     /**
@@ -101,13 +105,14 @@ public class AntCommunicationManager extends ConnectivityManager {
     private AntPluginPcc.IPluginAccessResultReceiver<AntPlusHeartRatePcc> base_IPluginAccessResultReceiver =
             (result, resultCode, initialDeviceState) -> {
                 logger.info(String.format("result: %s, resultCode: %s, initialDeviceState: %s", result == null ? "null" : result.toString(), resultCode.toString(), initialDeviceState.toString()));
-//                tv_status.setText(R.string.connection_string);
+                status = activity.getResources().getString(R.string.connection_string);
                 switch(resultCode) {
                     case SUCCESS:
                         hrPcc = result;
-//                        tv_status.setText(String.format( "%s\nPulse range: %d-%d", PulseZoneUtils.getZoneName(pulseSettings.getZoneRadioButtonId()), pulseLimits.getLowPulseLimit(), pulseLimits.getHighPulseLimit()));
+                       //status = (String.format(Locale.getDefault(),"%s\nPulse range: %d-%d", PulseZoneUtils.getZoneName(pulseSettings.getZoneRadioButtonId()), pulseLimits.getLowPulseLimit(), pulseLimits.getHighPulseLimit()));
                         //subscribeToHrEvents();
-                        super.onConnectionChangeConsumer.accept();
+
+//                 TODO       super.onConnectionChangeConsumer.accept();
                         break;
                    /* case CHANNEL_NOT_AVAILABLE:
 //                        tv_status.setText(R.string.error_string);
@@ -131,6 +136,7 @@ public class AntCommunicationManager extends ConnectivityManager {
                         tv_status.setText(R.string.error_string);
                         break;*/
                     default:
+                        status = activity.getResources().getString(R.string.error_string);
                         break;
                 }
             };
@@ -142,8 +148,15 @@ public class AntCommunicationManager extends ConnectivityManager {
             (DeviceState newDeviceState) ->
                     activity.runOnUiThread(() -> {
                         logger.log(Level.INFO, hrPcc.getDeviceName() + ": " + newDeviceState);
-                        super.onConnectionChangeConsumer.accept();
+//                        TODO super.onConnectionChangeConsumer.accept();
                         Toast.makeText(activity, "Device status changed: " + newDeviceState, Toast.LENGTH_SHORT).show();
                     });
+
+    @Override
+    public void disconnect() {
+        if(hrPcc != null) {
+            hrPcc.releaseAccess();
+        }
+    }
 
 }

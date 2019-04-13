@@ -40,6 +40,8 @@ public class Activity_WorkoutStatistics extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_workout_statistic);
+        Toolbar toolbar = findViewById(R.id.toolbar_statistics);
+        setSupportActionBar(toolbar);
 
         tv_workoutTime = findViewById(R.id.textView_timeWorkout);
         tv_averageHr = findViewById(R.id.textView_averageHr);

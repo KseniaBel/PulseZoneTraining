@@ -1,29 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.Activity_WorkoutStatistics">
 
-    <TextView
-        android:id="@+id/textView_workoutStatus"
-        android:layout_width="wrap_content"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar_statistics"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerInParent="true"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:text="@string/workout_finished_text_view"
-        android:textAlignment="viewStart"
-        android:textAppearance="@android:style/TextAppearance.DialogWindowTitle"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar_statistics"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
 
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView_workoutStatus" >
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -31,14 +35,26 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/textView_workoutStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="@string/workout_finished_text_view"
+                android:textAppearance="@android:style/TextAppearance.DialogWindowTitle"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_margin="5dp"
                 android:layout_marginBottom="5dp"
                 android:text="@string/time_of_workout_text_view"
                 android:textColor="@color/colorPrimary"
                 android:textSize="18sp" />
+
 
             <TextView
                 android:id="@+id/textView_timeWorkout"
@@ -118,4 +134,4 @@
 
     </ScrollView>
 
-</RelativeLayout>
+</LinearLayout>
