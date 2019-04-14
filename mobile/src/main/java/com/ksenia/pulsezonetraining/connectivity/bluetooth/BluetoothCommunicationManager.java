@@ -12,30 +12,24 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.ksenia.pulsezonetraining.connectivity.ConnectivityManager;
 import com.ksenia.pulsezonetraining.connectivity.DevicesNamesConsumer;
 import com.ksenia.pulsezonetraining.connectivity.Event;
-import com.ksenia.pulsezonetraining.connectivity.ReadingEventConsumer;
 import com.ksenia.pulsezonetraining.ui.Activity_BluetoothDevices;
-import com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import static android.support.constraint.Constraints.TAG;
-import static com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness.REQUEST_CODE_BLUETOOTH_DEVICES;
 import static com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness.REQUEST_ENABLE_BT;
 import static com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness.SCAN_RESULTS;
 
@@ -44,6 +38,7 @@ import static com.ksenia.pulsezonetraining.ui.Activity_PulseZonesFitness.SCAN_RE
  */
 
 public class BluetoothCommunicationManager extends ConnectivityManager {
+    public static final int REQUEST_CODE_BLUETOOTH_DEVICES = 2;
     public static final int HEART_RATE_SERVICE_UUID = 0x180D;
     public static final int  CHARACTERISTICS_HEART_RATE_MEASUREMENTS = 0x2A37;
     public static final UUID CLIENT_CHARACTERISTIC_CONFIG_UUID = BluetoothUtils.convertFromInteger(0x2902);
@@ -145,7 +140,9 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
     }
 
     @Override
-    public void connect(String deviceToConnect) {
+    public void connectToDevice(Intent data) {
+        String deviceToConnect = data.getStringExtra(Activity_BluetoothDevices.DEVICE_TO_CONNECT_NR);
+
         for(BluetoothDevice device: mScanResults.values()) {
             if(device.getName().equals(deviceToConnect)) {
                 logger.info("Connecting to " + device.getAddress());
@@ -158,7 +155,7 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
 
     public void disconnectGattServer() {
         logger.info("Closing Gatt connection");
-        notifyObservers(new Event(Event.Type.STATUS, "disconnected"));
+        notifyObservers(new Event(Event.Type.STATUS_CHANGED_DISCONNTECTED));
         mConnected = false;
         //mEchoInitialized = false;
         if (mGatt != null) {
@@ -168,19 +165,13 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
     }
 
     @Override
-    public void notifyObservers(Object arg) {
-        setChanged();
-        super.notifyObservers(arg);
-    }
-
-    @Override
     public boolean isConnected() {
         return mConnected;
     }
 
     public void connectGattServer() {
         mConnected = true;
-        notifyObservers(new Event(Event.Type.STATUS, "connected"));
+        notifyObservers(new Event(Event.Type.STATUS_CHANGED_CONNTECTED));
     }
 
 

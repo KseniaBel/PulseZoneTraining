@@ -21,7 +21,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dsi.ant.plugins.antplus.pccbase.MultiDeviceSearch;
 import com.ksenia.pulsezonetraining.connectivity.ConnectivityManager;
@@ -50,23 +49,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static android.app.Notification.VISIBILITY_PUBLIC;
-import static com.ksenia.pulsezonetraining.ui.Activity_MultiDeviceSearchSampler.EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT;
 
 /**
  * Created by ksenia on 30.12.18.
  */
 
 public class Activity_PulseZonesFitness extends AppCompatActivity implements Observer {
-    public static final int REQUEST_CODE_BLUETOOTH_DEVICES = 2;
-    public static final int REQUEST_CODE_ANT_DEVICES = 3;
+
     public static final int REQUEST_ENABLE_BT = 1;
     public static final String START_TIMING = "startTiming";
     public static final String WORKOUT_TIME = "workoutTime";
@@ -98,56 +93,60 @@ public class Activity_PulseZonesFitness extends AppCompatActivity implements Obs
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_pulse_zone_fitness);
-            pulseSettings = new PulseZoneSettings();
-            pulseSettings.read(getApplicationContext());
-            logger.info("Restore setting: " + pulseSettings.toString());
-            pulseLimits = PulseZoneUtils.calculateZonePulse(pulseSettings);
-            logger.info("low: " + pulseLimits.getLowPulseLimit() + " high: " + pulseLimits.getHighPulseLimit());
-            readingsBuffer = Collections.synchronizedList(new ArrayList<>());
+        setContentView(R.layout.activity_pulse_zone_fitness);
+        pulseSettings = new PulseZoneSettings();
+        pulseSettings.read(getApplicationContext());
+        logger.info("Restore setting: " + pulseSettings.toString());
+        pulseLimits = PulseZoneUtils.calculateZonePulse(pulseSettings);
+        logger.info("low: " + pulseLimits.getLowPulseLimit() + " high: " + pulseLimits.getHighPulseLimit());
+        readingsBuffer = Collections.synchronizedList(new ArrayList<>());
 
-            Toolbar toolbar = findViewById(R.id.toolbar_workout);
-            setSupportActionBar(toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar_workout);
+        setSupportActionBar(toolbar);
 
-            tv_status = findViewById(R.id.textView_ZoneStatus);
-            tv_heartRate = findViewById(R.id.textView_HeartRatePulseZone);
-            chronometer = findViewById(R.id.chronometer);
-            tv_status.setText(R.string.connection_string);
-            btn_pauseResume = findViewById(R.id.button_pause);
-            btn_stop = findViewById(R.id.button_stop);
-            btn_stop.setVisibility(View.GONE);
-            graph = findViewById(R.id.graph);
-            setupChart();
-            setLegend();
-            setupAxes();
-            setupData();
+        tv_status = findViewById(R.id.textView_ZoneStatus);
+        tv_heartRate = findViewById(R.id.textView_HeartRatePulseZone);
+        chronometer = findViewById(R.id.chronometer);
+        tv_status.setText(getResources().getString(R.string.connection_string));
+        btn_pauseResume = findViewById(R.id.button_pause);
+        btn_stop = findViewById(R.id.button_stop);
+        btn_stop.setVisibility(View.GONE);
+        graph = findViewById(R.id.graph);
+        setupChart();
+        setLegend();
+        setupAxes();
+        setupData();
 
-            createNotificationChannel();
+        createNotificationChannel();
 
-            FitnessSQLiteDBHelper helper = new FitnessSQLiteDBHelper(this);
-            repository = new HRRecordsRepository(helper);
-            //handleReset();
+        FitnessSQLiteDBHelper helper = new FitnessSQLiteDBHelper(this);
+        repository = new HRRecordsRepository(helper);
+        //handleReset();
 
-            btn_pauseResume.setOnClickListener(v -> {
-                if(connectivityManager.isConnected() && chronometer.isRunning()) {
-                    pause();
-                } else if(connectivityManager.isConnected() && !chronometer.isRunning()) {
-                    resume();
-                }
-            });
+        btn_pauseResume.setOnClickListener(v -> {
+            if(connectivityManager.isConnected() && chronometer.isRunning()) {
+                pause();
+            } else if(connectivityManager.isConnected() && !chronometer.isRunning()) {
+                resume();
+            }
+        });
 
-            btn_stop.setOnClickListener(view -> {
-                Intent intent = new Intent(this, Activity_WorkoutStatistics.class);
-                intent.putExtra(START_TIMING, chronometer.getStartTime());
-                intent.putExtra(WORKOUT_TIME, chronometer.getText());
-                intent.putExtra(WEIGHT, pulseSettings.getWeight());
-                intent.putExtra(ZONE_BUTTON_ID, pulseSettings.getZoneRadioButtonId());
-                startActivity(intent);
-                finish();
-            });
+        btn_stop.setOnClickListener(view -> {
+            Intent intent = new Intent(this, Activity_WorkoutStatistics.class);
+            intent.putExtra(START_TIMING, chronometer.getStartTime());
+            intent.putExtra(WORKOUT_TIME, chronometer.getText());
+            intent.putExtra(WEIGHT, pulseSettings.getWeight());
+            intent.putExtra(ZONE_BUTTON_ID, pulseSettings.getZoneRadioButtonId());
+            startActivity(intent);
+            finish();
+        });
 
-        connectivityManager = ConnectivityManagerFactory.getInstance(this, getApplicationContext(), pulseSettings.getConnectionRadioButtonId());
-        connectivityManager.addObserver(this);
+        ConnectivityManager.CONNECTION_TYPE connectionType = ConnectivityManager.CONNECTION_TYPE.BLUETOOTH;
+        if (pulseSettings.getConnectionRadioButtonId() != R.id.radioButton_Bluetooth) {
+            connectionType = ConnectivityManager.CONNECTION_TYPE.ANT;
+        }
+
+        connectivityManager = ConnectivityManagerFactory.getInstance(this, this, getApplicationContext(), connectionType);
         connectivityManager.scanForDevices();
     }
 
@@ -184,22 +183,11 @@ public class Activity_PulseZonesFitness extends AppCompatActivity implements Obs
                 connectivityManager.scanForDevices();
             }
             //result from scanner activity
-        } else if (requestCode == REQUEST_CODE_BLUETOOTH_DEVICES) {
-            if(resultCode == RESULT_OK) {
-                String deviceToConnect = data.getStringExtra(Activity_BluetoothDevices.DEVICE_TO_CONNECT_NR);
-                connectivityManager.connect(deviceToConnect);
-            } else {
-                finish();
-                return;
-            }
-        } else if(requestCode == REQUEST_CODE_ANT_DEVICES) {
-            if(resultCode == RESULT_OK) {
-                MultiDeviceSearch.MultiDeviceSearchResult result = data.getParcelableExtra(EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT);
-                connectivityManager.connect(String.valueOf(result.getAntDeviceNumber()));
-            } else {
-                finish();
-                return;
-            }
+        } else if(resultCode == RESULT_OK) {
+            connectivityManager.connectToDevice(data);
+        } else {
+            finish();
+            return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -412,18 +400,27 @@ public class Activity_PulseZonesFitness extends AppCompatActivity implements Obs
     @Override
     public void update(Observable o, Object arg) {
         Event event = (Event) arg;
-        if(event.getEventType().equals(Event.Type.STATUS)) {
-            runOnUiThread(() ->
-            {
-                if (event.getMessage().equals("connected") && !chronometer.isRunning()) {
-                    resume();
-                } else if (event.getMessage().equals("disconnected") && chronometer.isRunning()) {
-                    pause();
+        switch (event.getEventType()) {
+            case READING:
+                synchronized (readingsBuffer) {
+                    readingsBuffer.add((Integer) event.getMessage());
+                    readingsBuffer.notifyAll();
                 }
-            });
-        } else if(event.getEventType().equals(Event.Type.READING)) {
-            readingsBuffer.add((Integer) event.getMessage());
-            readingsBuffer.notifyAll();
+                break;
+            case STATUS_CHANGED_CONNTECTED:
+                runOnUiThread(() -> {
+                    if (!chronometer.isRunning())
+                        resume();
+                });
+                break;
+            case STATUS_CHANGED_DISCONNTECTED:
+                runOnUiThread(() -> {
+                    if (chronometer.isRunning())
+                        pause();
+                });
+                break;
+            default:
+                throw new RuntimeException("Not implemented!");
         }
     }
 
