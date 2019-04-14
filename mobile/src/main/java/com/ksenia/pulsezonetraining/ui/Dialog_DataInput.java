@@ -31,6 +31,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.squareup.picasso.Picasso;
 //import com.squareup.picasso.Picasso;
 
 public class Dialog_DataInput extends DialogFragment {
@@ -77,17 +78,19 @@ public class Dialog_DataInput extends DialogFragment {
         googleSignInButton = detailsView.findViewById(R.id.sign_in_button);
         googleSignInButton.setSize(SignInButton.SIZE_STANDARD);
 
+        /*GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("826816501268-57kdo7b8bmfsfk32bonsmr3gb0senuas.apps.googleusercontent.com")
+                .requestEmail()
+                .build();*/
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("225532098479-35tev8e9aeo7r8jh47tjmfu58ivvlhc9.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
-
         googleSignInClient = GoogleSignIn.getClient(Dialog_DataInput.this.getActivity(), gso);
         googleSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent signInIntent = googleSignInClient.getSignInIntent();
-                startActivityForResult(signInIntent, 101);
+                startActivityForResult(signInIntent, 9002);
             }
         });
 
@@ -109,7 +112,7 @@ public class Dialog_DataInput extends DialogFragment {
         super.onActivityResult(requestCode, resultCode, data);
        // if (resultCode == Activity.RESULT_OK)
             switch (requestCode) {
-                case 101:
+                case 9002:
                     try {
                         // The Task returned from this call is always completed, no need to attach
                         // a listener.
@@ -127,11 +130,12 @@ public class Dialog_DataInput extends DialogFragment {
 
     private void onLoggedIn(GoogleSignInAccount googleSignInAccount) {
 
-        //Intent intent = new Intent(this.getActivity(), Dialog_DataInput.class);
-        //intent.putExtra(Dialog_DataInput.GOOGLE_ACCOUNT, googleSignInAccount);
+        Intent intent = new Intent(this.getActivity(), Dialog_DataInput.class);
+        intent.putExtra(Dialog_DataInput.GOOGLE_ACCOUNT, googleSignInAccount);
+
 
         //startActivity(intent);
-        //Picasso.get().load(googleSignInAccount.getPhotoUrl()).centerInside().fit().into(profileImage);
+        Picasso.with(this.getActivity()).load(googleSignInAccount.getPhotoUrl()).centerInside().fit().into(profileImage);
         profileName.setText(googleSignInAccount.getDisplayName());
         profileEmail.setText(googleSignInAccount.getEmail());
     }
