@@ -77,6 +77,8 @@
     <string name="label_multidevice">ANT+ multidevice search</string>
     <string name="label_pulsezonefitness">Workout in progress</string>
     <string name="label_workoutstatistics">Workout statistics</string>
+    <string name="turn_off_vibration">Turn OFF vibration</string>
+    <string name="turn_on_vibration">Turn ON vibration</string>
     <string-array name="device_types">
         <item>Bike Power</item>
         <item>Controllable Device</item>

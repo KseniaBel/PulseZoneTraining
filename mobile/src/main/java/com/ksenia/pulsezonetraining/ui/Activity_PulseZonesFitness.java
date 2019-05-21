@@ -159,16 +159,13 @@ public class Activity_PulseZonesFitness extends AppCompatActivity implements Obs
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        //noinspection SimplifiableIfStatement
-        if (item.getTitle().equals("Turn OFF vibration")) {
+        if (item.getTitle().equals(getString(R.string.turn_off_vibration))) {
             isVibrationDisable = true;
-            item.setTitle("Turn ON vibration");
+            item.setTitle(R.string.turn_on_vibration).setIcon(R.drawable.baseline_mobile_off_24);
         } else {
             isVibrationDisable = false;
-            item.setTitle("Turn OFF vibration");
+            item.setTitle(R.string.turn_off_vibration).setIcon(R.drawable.baseline_vibration_24);
         }
-
         return super.onOptionsItemSelected(item);
     }
 

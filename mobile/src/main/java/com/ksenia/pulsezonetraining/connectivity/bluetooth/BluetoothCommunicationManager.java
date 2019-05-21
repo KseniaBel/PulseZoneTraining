@@ -2,6 +2,7 @@ package com.ksenia.pulsezonetraining.connectivity.bluetooth;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -12,6 +13,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
@@ -56,6 +58,7 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
     private boolean mConnected;
     private boolean mEchoInitialized;
     private int nrOfDevice;
+    private ProgressDialog loadingBar;
 
 
     public BluetoothCommunicationManager(Context context, Activity activity) {
@@ -107,6 +110,29 @@ public class BluetoothCommunicationManager extends ConnectivityManager {
             mBluetoothLeScanner.startScan(filters, settings, mScanCallback);
             mScanning = true;
             mHandler = new Handler();
+
+            //Start progress bar
+            loadingBar = new ProgressDialog(activity);
+            loadingBar.setTitle("Scanning for devices");
+            loadingBar.setMessage("Seconds left: " + 10);
+            loadingBar.show();
+
+            //Scan for 10 seconds
+            new CountDownTimer(10000, 1000) {
+                public void onTick(long millisUntilFinished) {
+                    loadingBar.setMessage("Seconds left: " + millisUntilFinished/1000);
+                }
+
+                public void onFinish() {
+                    loadingBar.cancel();
+                    if (mScanResults.isEmpty()) {
+                        Toast.makeText(activity, "No bluetooth device found", Toast.LENGTH_SHORT).show();
+                        mScanning = false;
+                        activity.finish();
+                    }
+                }
+            }.start();
+
             mHandler.postDelayed(() -> this.stopScan(devicesNamesConsumer), SCAN_PERIOD);
         }
     }

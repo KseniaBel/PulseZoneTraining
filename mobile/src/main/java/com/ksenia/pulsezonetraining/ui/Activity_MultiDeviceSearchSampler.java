@@ -10,12 +10,13 @@ All rights reserved.
 package com.ksenia.pulsezonetraining.ui;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,7 +31,6 @@ import com.ksenia.pulsezonetraining.ui.custom.ArrayAdapter_MultiDeviceSearchResu
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Iterator;
 
 /**
  * Searches for multiple devices on the same channel using the multi-device
@@ -50,22 +50,22 @@ public class Activity_MultiDeviceSearchSampler extends AppCompatActivity {
     public static final String FILTER_KEY = "com.dsi.ant.antplus.pluginsampler.multidevicesearch.filter";
     public static final int RESULT_SEARCH_STOPPED = RESULT_FIRST_USER;
 
-    Context mContext;
-    TextView mStatus;
+    private Context mContext;
+    private TextView mStatus;
 
-    ListView mFoundDevicesList;
-    ArrayList<MultiDeviceSearchResultWithRSSI> mFoundDevices = new ArrayList<MultiDeviceSearchResultWithRSSI>();
-    ArrayAdapter_MultiDeviceSearchResult mFoundAdapter;
+    private ListView mFoundDevicesList;
+    private ArrayList<MultiDeviceSearchResultWithRSSI> mFoundDevices = new ArrayList<MultiDeviceSearchResultWithRSSI>();
+    private ArrayAdapter_MultiDeviceSearchResult mFoundAdapter;
 
-    ListView mConnectedDevicesList;
-    ArrayList<MultiDeviceSearchResultWithRSSI> mConnectedDevices = new ArrayList<MultiDeviceSearchResultWithRSSI>();
-    ArrayAdapter_MultiDeviceSearchResult mConnectedAdapter;
+    private ListView mConnectedDevicesList;
+    private ArrayList<MultiDeviceSearchResultWithRSSI> mConnectedDevices = new ArrayList<MultiDeviceSearchResultWithRSSI>();
+    private ArrayAdapter_MultiDeviceSearchResult mConnectedAdapter;
 
-    MultiDeviceSearch mSearch;
+    private MultiDeviceSearch mSearch;
+    private ProgressDialog loadingBar;
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multidevice_scan);
         Toolbar toolbar = findViewById(R.id.toolbar_ant);
@@ -82,29 +82,46 @@ public class Activity_MultiDeviceSearchSampler extends AppCompatActivity {
 
         mFoundDevicesList.setOnItemClickListener((parent, view, position, id) -> launchConnection(mFoundAdapter.getItem(position).mDevice));
 
-        mConnectedDevicesList = findViewById(R.id.listView_AlreadyConnectedDevices);
-        mConnectedDevicesList.setDivider(getDrawable(R.drawable.divider));
+        //mConnectedDevicesList = findViewById(R.id.listView_AlreadyConnectedDevices);
+        //mConnectedDevicesList.setDivider(getDrawable(R.drawable.divider));
 
-        mConnectedAdapter = new ArrayAdapter_MultiDeviceSearchResult(this, mConnectedDevices);
-        mConnectedDevicesList.setAdapter(mConnectedAdapter);
+       // mConnectedAdapter = new ArrayAdapter_MultiDeviceSearchResult(this, mConnectedDevices);
+        //mConnectedDevicesList.setAdapter(mConnectedAdapter);
 
-        mConnectedDevicesList.setOnItemClickListener((parent, view, position, id) -> launchConnection(mConnectedAdapter.getItem(position).mDevice));
+       // mConnectedDevicesList.setOnItemClickListener((parent, view, position, id) -> launchConnection(mConnectedAdapter.getItem(position).mDevice));
 
         // start the multi-device search
         mSearch = new MultiDeviceSearch(this, EnumSet.of(DeviceType.HEARTRATE), mCallback, null);
+
+        //Start progress bar
+        loadingBar = new ProgressDialog(this);
+        loadingBar.setTitle("Scanning for devices");
+        loadingBar.setMessage("Seconds left: " + 10);
+        loadingBar.show();
+
+        //Scan for 10 seconds
+        new CountDownTimer(10000, 1000) {
+            public void onTick(long millisUntilFinished) {
+                loadingBar.setMessage("Seconds left: " + millisUntilFinished/1000);
+            }
+
+            public void onFinish() {
+                if(mFoundDevices.isEmpty()) {
+                    onBackPressed();
+                }
+            }
+        }.start();
     }
 
     @Override
-    public void onDestroy()
-    {
+    public void onDestroy() {
         super.onDestroy();
 
         // close and clean-up the multi-device search
         mSearch.close();
     }
 
-    public void launchConnection(MultiDeviceSearchResult result)
-    {
+    public void launchConnection(MultiDeviceSearchResult result) {
         if (result != null) {
             Intent intent = new Intent();
             intent.putExtra(EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT, result);
@@ -116,6 +133,7 @@ public class Activity_MultiDeviceSearchSampler extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if(mFoundDevices.isEmpty()) {
+            loadingBar.cancel();
             Toast.makeText(this, "No ANT+ devices were found", Toast.LENGTH_SHORT).show();
         }
         super.onBackPressed();
@@ -124,27 +142,29 @@ public class Activity_MultiDeviceSearchSampler extends AppCompatActivity {
     /**
      * Callbacks from the multi-device search interface
      */
-    private MultiDeviceSearch.SearchCallbacks mCallback = new MultiDeviceSearch.SearchCallbacks()
-    {
+    private MultiDeviceSearch.SearchCallbacks mCallback = new MultiDeviceSearch.SearchCallbacks() {
         /**
          * Called when a device is found. Display found devices in connected and
          * found lists
          */
-        public void onDeviceFound(final MultiDeviceSearchResult deviceFound)
-        {
+        public void onDeviceFound(final MultiDeviceSearchResult deviceFound) {
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    loadingBar.cancel();
+                }
+            });
+
             final MultiDeviceSearchResultWithRSSI result = new MultiDeviceSearchResultWithRSSI();
             result.mDevice = deviceFound;
 
-            // We split up devices already connected to the plugin from
-            // un-connected devices to make this information more visible to the
-            // user, since the user most likely wants to be aware of which
-            // device they are already using in another app
-            if (deviceFound.isAlreadyConnected())
-            {
-                runOnUiThread(() -> {
+            if (deviceFound == null) {
+                onBackPressed();
+                /*runOnUiThread(() -> {
                     // connected device category is invisible unless there
                     // are some present
-                    if (mConnectedAdapter.isEmpty())
+                    /*if (mConnectedAdapter.isEmpty())
                     {
                         findViewById(R.id.textView_AlreadyConnectedTitle).setVisibility(
                                 View.VISIBLE);
@@ -153,10 +173,8 @@ public class Activity_MultiDeviceSearchSampler extends AppCompatActivity {
 
                     mConnectedAdapter.add(result);
                     mConnectedAdapter.notifyDataSetChanged();
-                });
-            }
-            else
-            {
+                });*/
+            } else {
                 runOnUiThread(() -> {
                     mFoundAdapter.add(result);
                     mFoundAdapter.notifyDataSetChanged();
@@ -167,8 +185,7 @@ public class Activity_MultiDeviceSearchSampler extends AppCompatActivity {
         /**
          * The search has been stopped unexpectedly
          */
-        public void onSearchStopped(RequestAccessResult reason)
-        {
+        public void onSearchStopped(RequestAccessResult reason) {
             Intent result = new Intent();
             result.putExtra(EXTRA_KEY_MULTIDEVICE_SEARCH_RESULT, reason.getIntValue());
             setResult(RESULT_SEARCH_STOPPED, result);
